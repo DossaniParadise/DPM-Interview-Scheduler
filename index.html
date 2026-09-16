@@ -8,8 +8,7 @@
   :root{
     --bg:#f6f4ef; --paper:#ffffff; --ink:#1c1f1d; --ink-2:#5b615e; --ink-3:#8a908c;
     --line:#dfdcd4; --green:#1f5e4a; --green-2:#17493a; --green-tint:#e6f0ec;
-    --red:#a83a3a; --red-tint:#f7e6e6; --amber:#8a5a12; --amber-tint:#f8efdc;
-    --r:10px;
+    --red:#a83a3a; --red-tint:#f7e6e6; --amber:#8a5a12; --amber-tint:#f8efdc; --r:10px;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -29,155 +28,125 @@
   label.f{display:block;font-size:15px;color:var(--ink-2);margin:0 0 6px}
   .field{margin-bottom:18px}
   .err{color:var(--red);font-size:15px;min-height:22px;margin-top:6px}
-  .ok{color:var(--green);font-size:15px}
   .muted{color:var(--ink-3);font-size:15px}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-
-  /* candidate shell */
   .wrap{max-width:640px;margin:0 auto;padding:36px 20px 80px}
-  header.top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:34px}
+  header.top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:34px;gap:12px;flex-wrap:wrap}
   header.top .brand{font-weight:700;letter-spacing:.02em;color:var(--green)}
   header.top .step{font-size:15px;color:var(--ink-3)}
   h1{font-size:30px;line-height:1.2;margin:0 0 8px;font-weight:700}
+  h2{font-size:19px;margin:0 0 4px}
   .lead{color:var(--ink-2);margin:0 0 28px;max-width:52ch}
   .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px}
   .nav{display:flex;justify-content:space-between;gap:10px;margin-top:26px}
   .name-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .name-grid input{font-size:20px;padding:15px 16px}
-
-  /* choices */
   .choice{display:block;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:8px;cursor:pointer}
   .choice:hover{border-color:var(--green)}
   .choice.sel{border-color:var(--green);background:var(--green-tint)}
   .choice input{width:auto;margin-right:10px;accent-color:var(--green)}
-  .q{margin-bottom:28px}
-  .q .qt{font-weight:600;margin-bottom:10px}
-  .q .req{color:var(--red);margin-left:3px}
-
-  /* slots */
-  .day{margin-bottom:22px}
-  .day h3{font-size:16px;margin:0 0 10px;color:var(--ink-2);font-weight:600}
+  .q{margin-bottom:28px}.q .qt{font-weight:600;margin-bottom:10px}.req{color:var(--red);margin-left:3px}
+  .day{margin-bottom:22px}.day h3{font-size:16px;margin:0 0 10px;color:var(--ink-2);font-weight:600}
   .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
-  .slot{background:var(--paper);border:1px solid var(--line);color:var(--ink);padding:12px 8px;min-height:0;font-weight:600;border-radius:var(--r)}
+  .slot{background:var(--paper);border:1px solid var(--line);color:var(--ink);padding:12px 8px;min-height:0;font-weight:600}
   .slot:hover{background:var(--green-tint);border-color:var(--green)}
   .slot.sel{background:var(--green);color:#fff;border-color:var(--green)}
   .slot.taken{background:#f0eee8;color:var(--ink-3);text-decoration:line-through;cursor:not-allowed;font-weight:500}
   .slot.taken:hover{background:#f0eee8;border-color:var(--line)}
   .slot small{display:block;font-weight:500;font-size:11px;text-decoration:none}
-
   .confirm-box{background:var(--green-tint);border:1px solid #bfd8cd;border-radius:var(--r);padding:18px 20px;margin:16px 0}
   .confirm-box strong{display:block;font-size:22px}
+  .jobtag{display:inline-block;background:var(--green-tint);color:var(--green);border-radius:20px;padding:3px 12px;font-size:14px;font-weight:600;margin-bottom:18px}
 
-  /* admin shell */
-  .admin{max-width:1040px;margin:0 auto;padding:24px 20px 80px}
+  /* admin */
+  .admin{max-width:1080px;margin:0 auto;padding:24px 20px 80px}
   .admin header.top{margin-bottom:18px}
   .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px;overflow-x:auto}
   .tabs button{background:none;color:var(--ink-2);border-radius:0;padding:12px 14px;min-height:0;border-bottom:2px solid transparent;font-size:15px;white-space:nowrap}
   .tabs button:hover{background:none;color:var(--ink)}
   .tabs button.on{color:var(--green);border-bottom-color:var(--green)}
+  .tabs button .n{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#f0eee8;color:var(--ink-2);font-size:12px;margin-left:5px}
   .panel{display:none}.panel.on{display:block}
   table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
   th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
   th{background:#f0eee8;font-weight:600;color:var(--ink-2)}
   tr:last-child td{border-bottom:0}
-  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap}
   .pill.open{background:var(--green-tint);color:var(--green)}
   .pill.booked{background:var(--amber-tint);color:var(--amber)}
+  .pill.grey{background:#f0eee8;color:var(--ink-2)}
   .list-item{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
-  .list-item .grow{flex:1}
+  .list-item .grow{flex:1;min-width:0}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .dow{display:flex;gap:6px;flex-wrap:wrap}
-  .dow label{display:flex;align-items:center;gap:5px;font-size:15px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer}
-  .dow input{width:auto;accent-color:var(--green)}
+  .dow,.staffpick{display:flex;gap:6px;flex-wrap:wrap}
+  .dow label,.staffpick label{display:flex;align-items:center;gap:6px;font-size:15px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer}
+  .dow input,.staffpick input{width:auto;accent-color:var(--green)}
   .login{max-width:380px;margin:60px auto}
   details.resp{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px}
   details.resp summary{padding:12px 14px;cursor:pointer;display:flex;gap:12px;align-items:center;flex-wrap:wrap;list-style:none}
   details.resp summary::-webkit-details-marker{display:none}
   details.resp .body{padding:0 14px 14px;border-top:1px solid var(--line)}
   .ans{margin:10px 0}.ans .k{font-size:14px;color:var(--ink-3)}.ans .v{white-space:pre-wrap}
-  .opt-row{display:flex;gap:6px;margin-bottom:6px}
-  .opt-row input{padding:8px 10px;font-size:15px}
+  .opt-row{display:flex;gap:6px;margin-bottom:6px}.opt-row input{padding:8px 10px;font-size:15px}
   .status{font-size:15px;margin-top:10px;min-height:22px}
-
-  @media (max-width:640px){
-    .name-grid,.grid2,.grid3{grid-template-columns:1fr}
-    h1{font-size:26px}
-    .card{padding:20px 16px}
-    .wrap{padding:24px 14px 60px}
-  }
-  @media (prefers-reduced-motion:no-preference){
-    .card{transition:opacity .15s}
-  }
+  .setup{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:22px}
+  .setup ol{margin:8px 0 0;padding-left:22px}
+  .setup li{margin:4px 0;color:var(--ink-2)}
+  .setup li.done{color:var(--green);text-decoration:line-through}
+  .setup li.now{color:var(--ink);font-weight:600}
+  .blocked{opacity:.5;pointer-events:none}
+  .file-btn{position:relative;overflow:hidden;display:inline-block}
+  .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .sel-inline{width:auto;padding:8px 10px;font-size:15px}
+  @media (max-width:640px){.name-grid,.grid2,.grid3{grid-template-columns:1fr}h1{font-size:26px}.card{padding:20px 16px}.wrap{padding:24px 14px 60px}}
 </style>
 </head>
 <body>
 
 <!-- ================= CANDIDATE ================= -->
 <div id="candidateView" class="wrap" style="display:none">
-  <header class="top">
-    <span class="brand">Dossani Paradise</span>
-    <span class="step" id="stepLabel"></span>
-  </header>
+  <header class="top"><span class="brand">Dossani Paradise</span><span class="step" id="stepLabel"></span></header>
 
-  <!-- Step 1: name -->
   <section id="s1" class="card" style="display:none">
     <h1>Let's get you scheduled.</h1>
-    <p class="lead">Enter your name as it appears on your application. This takes about five minutes: a few short questions, then you pick a time to talk with us.</p>
+    <p class="lead">Enter your name as it appears on your application. A few short questions, then you pick a time to talk with us.</p>
     <div class="name-grid">
       <div class="field"><label class="f" for="fn">First name</label><input id="fn" autocomplete="given-name"></div>
       <div class="field"><label class="f" for="ln">Last name</label><input id="ln" autocomplete="family-name"></div>
     </div>
-    <div class="field"><label class="f" for="p4">Last 4 digits of the phone number on your application</label><input id="p4" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" style="max-width:160px;letter-spacing:.2em;font-size:22px"></div>
+    <div class="field"><label class="f" for="p4">Last 4 digits of the phone number on your application</label><input id="p4" inputmode="numeric" maxlength="4" autocomplete="off" style="max-width:160px;letter-spacing:.2em;font-size:22px"></div>
     <div class="err" id="e1"></div>
-    <div class="nav"><span></span><button id="verifyBtn" onclick="C.next(1)">Continue</button></div>
+    <div class="nav"><span></span><button id="verifyBtn" onclick="C.verify()">Continue</button></div>
   </section>
 
-  <!-- Step 2: job -->
-  <section id="s2" class="card" style="display:none">
-    <h1>Which position are you interviewing for?</h1>
-    <p class="lead">Pick the role from your application.</p>
-    <div id="jobList"></div>
-    <div class="err" id="e2"></div>
-    <div class="nav"><button class="quiet" onclick="C.back(2)">Back</button><button onclick="C.next(2)">Continue</button></div>
-  </section>
-
-  <!-- Step 3: questions -->
   <section id="s3" class="card" style="display:none">
+    <div class="jobtag" id="jobTag3"></div>
     <h1>A few questions first.</h1>
     <p class="lead">Short answers are fine. There are no trick questions.</p>
     <div id="qList"></div>
     <div class="err" id="e3"></div>
-    <div class="nav"><button class="quiet" onclick="C.back(3)">Back</button><button onclick="C.next(3)">Continue</button></div>
+    <div class="nav"><button class="quiet" onclick="C.show(1)">Back</button><button onclick="C.next(3)">Continue</button></div>
   </section>
 
-  <!-- Step 4: slot -->
   <section id="s4" class="card" style="display:none">
+    <div class="jobtag" id="jobTag4"></div>
     <h1>Pick a time.</h1>
-    <p class="lead">Each slot is 30 minutes. Times shown are Central (Texas). Crossed-out times are already taken.</p>
+    <p class="lead" id="slotLead">Times shown are Central (Texas). Crossed-out times are already taken.</p>
     <div id="slotList"><p class="muted">Loading available times…</p></div>
     <div class="err" id="e4"></div>
-    <div class="nav"><button class="quiet" onclick="C.back(4)">Back</button><button id="bookBtn" onclick="C.submit()">Book this time</button></div>
+    <div class="nav"><button class="quiet" onclick="C.show(3)">Back</button><button id="bookBtn" onclick="C.submit()">Book this time</button></div>
   </section>
 
-  <!-- Step 5: done -->
   <section id="s5" class="card" style="display:none">
     <h1>You're booked.</h1>
     <p class="lead">We'll call you at the number on your application. Here's your time:</p>
     <div class="confirm-box"><strong id="doneSlot"></strong><span id="doneWho"></span></div>
-    <div class="row">
-      <button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button>
-    </div>
+    <button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button>
     <p class="muted" style="margin-top:18px">Need to change it? Contact us and we'll move it — this link only works once.</p>
   </section>
 
   <p class="muted" style="text-align:center;margin-top:40px;font-size:13px"><a href="#/admin" style="color:var(--ink-3)">Staff sign-in</a></p>
-
-  <!-- closed state -->
-  <section id="s0" class="card" style="display:none">
-    <h1>Scheduling isn't open right now.</h1>
-    <p class="lead">There are no interview times available yet. Check back soon, or reach out to the person who sent you this link.</p>
-  </section>
 </div>
 
 <!-- ================= ADMIN ================= -->
@@ -188,78 +157,104 @@
   </header>
 
   <div id="adminLogin" class="login card">
-    <h1 style="font-size:22px">Sign in</h1>
+    <h1 style="font-size:22px">Staff sign-in</h1>
     <div class="field"><label class="f">Email</label><input id="aEmail" type="email" autocomplete="username"></div>
     <div class="field"><label class="f">Password</label><input id="aPass" type="password" autocomplete="current-password"></div>
     <div class="err" id="aErr"></div>
     <button style="width:100%" onclick="A.login()">Sign in</button>
-    <p class="muted" style="margin-top:14px">Admin accounts are created in the Firebase console under Authentication.</p>
+    <p class="muted" style="margin-top:14px">Accounts are created in the Firebase console under Authentication.</p>
   </div>
 
   <div id="adminApp" style="display:none">
+    <div class="setup" id="setupBox"></div>
+
     <div class="tabs">
-      <button class="on" data-t="responses" onclick="A.tab('responses')">Responses</button>
-      <button data-t="slots" onclick="A.tab('slots')">Time slots</button>
+      <button class="on" data-t="jobs" onclick="A.tab('jobs')">1 · Job postings</button>
+      <button data-t="candidates" onclick="A.tab('candidates')">2 · Candidates<span class="n" id="nCand">0</span></button>
+      <button data-t="slots" onclick="A.tab('slots')">3 · Time slots<span class="n" id="nSlots">0</span></button>
+      <button data-t="interviews" onclick="A.tab('interviews')">Interviews<span class="n" id="nInt">0</span></button>
       <button data-t="questions" onclick="A.tab('questions')">Questions</button>
-      <button data-t="jobs" onclick="A.tab('jobs')">Job postings</button>
-      <button data-t="candidates" onclick="A.tab('candidates')">Approved candidates</button>
+      <button data-t="staff" onclick="A.tab('staff')">Staff</button>
     </div>
 
-    <!-- Responses -->
-    <div class="panel on" id="p-responses">
-      <div class="row" style="justify-content:space-between;margin-bottom:14px">
-        <span class="muted" id="respCount"></span>
-        <div class="row">
-          <select id="respJobFilter" onchange="A.renderResponses()" style="width:auto;padding:8px 10px;font-size:15px"><option value="">All jobs</option></select>
-          <button class="quiet small" onclick="A.exportCsv()">Export CSV</button>
-        </div>
-      </div>
-      <div id="respList"><p class="muted">Loading…</p></div>
-    </div>
-
-    <!-- Slots -->
-    <div class="panel" id="p-slots">
+    <!-- 1 Jobs -->
+    <div class="panel on" id="p-jobs">
       <div class="card" style="margin-bottom:22px">
-        <h2 style="margin:0 0 4px;font-size:19px">Create interview blocks</h2>
-        <p class="muted" style="margin:0 0 16px">Generates 30-minute slots between the start and end time on each selected day in the range. Existing slots are left alone, so it's safe to run again.</p>
+        <h2>Job postings</h2>
+        <p class="muted" style="margin:0 0 12px">Everything else hangs off a posting: candidates belong to one, slots are created for one, and questions can be scoped to one.</p>
+        <div class="row"><input id="jobNew" placeholder="e.g. Junior System Administrator" style="flex:1;min-width:220px"><button onclick="A.addJob()">Add posting</button></div>
+        <div class="status" id="jStatus"></div>
+      </div>
+      <div id="jobAdmin"></div>
+    </div>
+
+    <!-- 2 Candidates -->
+    <div class="panel" id="p-candidates">
+      <div class="card" style="margin-bottom:22px" id="candForm">
+        <h2>Approved candidates</h2>
+        <p class="muted" style="margin:0 0 14px">Only people on this list can book, and each can book once. Paste one per line as <em>First Last, phone</em> — commas or tabs both work. Resumes can be attached after adding.</p>
+        <div class="field"><label class="f">Posting they applied to</label><select id="candJob"></select></div>
+        <textarea id="candPaste" placeholder="Ka'Bren Mitchell, (972) 827-6352&#10;Mustafa Haq, 917-680-2064" style="min-height:120px;font-size:15px"></textarea>
+        <div class="row" style="margin-top:10px"><button onclick="A.importCandidates()">Add to list</button><span class="status" id="cStatus"></span></div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <span class="muted" id="candSummary"></span>
+        <div class="row"><select id="candFilterJob" class="sel-inline" onchange="A.renderCandidates()"></select><input id="candSearch" placeholder="Search" oninput="A.renderCandidates()" style="width:180px;padding:8px 10px;font-size:15px"></div>
+      </div>
+      <div id="candAdmin"></div>
+    </div>
+
+    <!-- 3 Slots -->
+    <div class="panel" id="p-slots">
+      <div class="card" style="margin-bottom:22px" id="slotForm">
+        <h2>Create interview slots</h2>
+        <p class="muted" style="margin:0 0 16px">Pick a posting, a date or date range, and a window. It fills the window with back-to-back slots — 10am to 2pm at 30 minutes makes 8. Existing slots are left alone, so re-running is safe.</p>
+        <div class="field"><label class="f">Posting</label><select id="gJob" onchange="A.previewSlots()"></select></div>
         <div class="grid2">
-          <div class="field"><label class="f">From date</label><input id="gFrom" type="date"></div>
-          <div class="field"><label class="f">To date</label><input id="gTo" type="date"></div>
+          <div class="field"><label class="f">From date</label><input id="gFrom" type="date" onchange="A.previewSlots()"></div>
+          <div class="field"><label class="f">To date (same as from for a single day)</label><input id="gTo" type="date" onchange="A.previewSlots()"></div>
         </div>
-        <div class="field"><label class="f">Days of the week</label>
-          <div class="dow" id="gDow">
-            <label><input type="checkbox" value="1" checked>Mon</label><label><input type="checkbox" value="2" checked>Tue</label>
-            <label><input type="checkbox" value="3" checked>Wed</label><label><input type="checkbox" value="4" checked>Thu</label>
-            <label><input type="checkbox" value="5" checked>Fri</label><label><input type="checkbox" value="6">Sat</label><label><input type="checkbox" value="0">Sun</label>
-          </div>
-        </div>
+        <div class="field"><label class="f">Days of the week (only matters for a range)</label>
+          <div class="dow" id="gDow" onchange="A.previewSlots()">
+            <label><input type="checkbox" value="1" checked>Mon</label><label><input type="checkbox" value="2" checked>Tue</label><label><input type="checkbox" value="3" checked>Wed</label>
+            <label><input type="checkbox" value="4" checked>Thu</label><label><input type="checkbox" value="5" checked>Fri</label><label><input type="checkbox" value="6" checked>Sat</label><label><input type="checkbox" value="0" checked>Sun</label>
+          </div></div>
         <div class="grid3">
-          <div class="field"><label class="f">First slot starts</label><input id="gStart" type="time" value="09:00"></div>
-          <div class="field"><label class="f">Last slot ends</label><input id="gEnd" type="time" value="12:00"></div>
-          <div class="field"><label class="f">Slot length (minutes)</label><input id="gLen" type="number" value="30" min="10" step="5"></div>
+          <div class="field"><label class="f">Window starts</label><input id="gStart" type="time" value="10:00" onchange="A.previewSlots()"></div>
+          <div class="field"><label class="f">Window ends</label><input id="gEnd" type="time" value="14:00" onchange="A.previewSlots()"></div>
+          <div class="field"><label class="f">Slot length (minutes)</label><input id="gLen" type="number" value="30" min="10" step="5" onchange="A.previewSlots()"></div>
         </div>
+        <div class="field"><label class="f">Interviewers for these slots</label><div class="staffpick" id="gStaff"></div><p class="muted" style="margin:6px 0 0">Assigned staff see these interviews under their own "Interviews" tab.</p></div>
         <div class="row"><button onclick="A.generateSlots()">Create slots</button><span class="status" id="gStatus"></span></div>
       </div>
-
       <div class="row" style="justify-content:space-between;margin-bottom:12px">
         <span class="muted" id="slotSummary"></span>
-        <div class="row">
-          <button class="quiet small" onclick="A.deleteOpenPast()">Remove past open slots</button>
-          <button class="danger small" onclick="A.deleteAllOpen()">Delete all open slots</button>
-        </div>
+        <div class="row"><select id="slotFilterJob" class="sel-inline" onchange="A.renderSlots()"></select><button class="quiet small" onclick="A.deleteOpenPast()">Remove past open</button><button class="danger small" onclick="A.deleteAllOpen()">Delete all open</button></div>
       </div>
-      <div id="slotAdmin"><p class="muted">Loading…</p></div>
+      <div id="slotAdmin"></div>
+    </div>
+
+    <!-- Interviews -->
+    <div class="panel" id="p-interviews">
+      <div class="row" style="justify-content:space-between;margin-bottom:14px">
+        <div class="row">
+          <select id="intWho" class="sel-inline" onchange="A.renderInterviews()"><option value="mine">My interviews</option><option value="all">All interviews</option></select>
+          <select id="intJob" class="sel-inline" onchange="A.renderInterviews()"></select>
+          <span class="muted" id="intCount"></span>
+        </div>
+        <div class="row"><button class="quiet small" onclick="A.exportIcs()">Export to Outlook / Teams (.ics)</button><button class="quiet small" onclick="A.exportCsv()">Export CSV</button></div>
+      </div>
+      <div id="intList"></div>
     </div>
 
     <!-- Questions -->
     <div class="panel" id="p-questions">
       <div class="card" style="margin-bottom:22px">
-        <h2 style="margin:0 0 14px;font-size:19px" id="qFormTitle">Add a question</h2>
-        <div class="field"><label class="f">Question text</label><textarea id="qText" style="min-height:70px"></textarea></div>
+        <h2 id="qFormTitle">Add a question</h2>
+        <div class="field" style="margin-top:12px"><label class="f">Question</label><textarea id="qText" style="min-height:70px"></textarea></div>
         <div class="grid3">
-          <div class="field"><label class="f">Type</label>
-            <select id="qType" onchange="A.qTypeChanged()"><option value="text">Free response</option><option value="mc">Multiple choice (pick one)</option><option value="multi">Checkboxes (pick any)</option></select></div>
-          <div class="field"><label class="f">Applies to</label><select id="qJob"><option value="">All jobs</option></select></div>
+          <div class="field"><label class="f">Type</label><select id="qType" onchange="A.qTypeChanged()"><option value="text">Free response</option><option value="mc">Multiple choice (pick one)</option><option value="multi">Checkboxes (pick any)</option></select></div>
+          <div class="field"><label class="f">Applies to</label><select id="qJob"></select></div>
           <div class="field"><label class="f">Required</label><select id="qReq"><option value="1">Yes</option><option value="0">No</option></select></div>
         </div>
         <div class="field" id="qOptsWrap" style="display:none"><label class="f">Answer choices</label><div id="qOpts"></div><button class="quiet small" onclick="A.addOpt()">Add choice</button></div>
@@ -268,30 +263,15 @@
       <div id="qAdmin"></div>
     </div>
 
-    <!-- Candidates -->
-    <div class="panel" id="p-candidates">
+    <!-- Staff -->
+    <div class="panel" id="p-staff">
       <div class="card" style="margin-bottom:22px">
-        <h2 style="margin:0 0 4px;font-size:19px">Approved candidates</h2>
-        <p class="muted" style="margin:0 0 14px">Only people on this list can book. Each can book once. Paste one per line as <em>First Last, phone</em> — commas or tabs both work, so you can paste straight from a spreadsheet.</p>
-        <textarea id="candPaste" placeholder="Ka'Bren Mitchell, (972) 827-6352&#10;Mustafa Haq, 917-680-2064" style="min-height:130px;font-size:15px"></textarea>
-        <div class="row" style="margin-top:10px"><button onclick="A.importCandidates()">Add to list</button><span class="status" id="cStatus"></span></div>
+        <h2>Staff</h2>
+        <p class="muted" style="margin:0 0 12px">Anyone who signs in is added here automatically. You can also add someone ahead of time so they can be assigned to slots before their first sign-in. Sign-in accounts themselves are created in the Firebase console.</p>
+        <div class="grid2"><input id="stName" placeholder="Name"><input id="stEmail" type="email" placeholder="email@dossaniparadise.com"></div>
+        <div class="row" style="margin-top:10px"><button onclick="A.addStaff()">Add staff member</button><span class="status" id="stStatus"></span></div>
       </div>
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <span class="muted" id="candSummary"></span>
-        <input id="candSearch" placeholder="Search" oninput="A.renderCandidates()" style="width:220px;padding:8px 10px;font-size:15px">
-      </div>
-      <div id="candAdmin"><p class="muted">Loading…</p></div>
-    </div>
-
-    <!-- Jobs -->
-    <div class="panel" id="p-jobs">
-      <div class="card" style="margin-bottom:22px">
-        <h2 style="margin:0 0 14px;font-size:19px">Job postings</h2>
-        <p class="muted" style="margin:0 0 12px">Candidates pick from this list. Removing a job doesn't delete responses already tied to it.</p>
-        <div class="row"><input id="jobNew" placeholder="e.g. Junior System Administrator" style="flex:1;min-width:220px"><button onclick="A.addJob()">Add</button></div>
-        <div class="status" id="jStatus"></div>
-      </div>
-      <div id="jobAdmin"></div>
+      <div id="staffAdmin"></div>
     </div>
   </div>
 </div>
@@ -299,12 +279,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
-/* ============================================================
-   Firebase
-   The web apiKey is a public identifier, not a secret — access is
-   controlled by the Firestore rules (see notes shipped with this file).
-   ============================================================ */
 firebase.initializeApp({
   apiKey: "AIzaSyAGVKL7XcAcFfCSD0JShD_v2oP4nXaxUnw",
   authDomain: "dpm-interview-scheduler.firebaseapp.com",
@@ -313,26 +289,22 @@ firebase.initializeApp({
   messagingSenderId: "665696820475",
   appId: "1:665696820475:web:0efb712a2971b6c6cde45e"
 });
-const db = firebase.firestore();
-const auth = firebase.auth();
+const db = firebase.firestore(), auth = firebase.auth(), storage = firebase.storage();
 const TS = () => firebase.firestore.FieldValue.serverTimestamp();
 
-/* ---------- shared helpers ---------- */
+/* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const pad = n => String(n).padStart(2, "0");
+const pad = n => String(n).padStart(2,"0");
 const todayIso = () => { const d = new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
-const nowMin = () => { const d = new Date(); return d.getHours()*60 + d.getMinutes(); };
+const nowMin = () => { const d = new Date(); return d.getHours()*60+d.getMinutes(); };
 const toMin = t => { const [h,m] = t.split(":").map(Number); return h*60+m; };
 const fromMin = m => pad(Math.floor(m/60))+":"+pad(m%60);
-const ampm = t => { const [h,m] = t.split(":").map(Number); const s = h<12?"am":"pm"; return ((h%12)||12)+":"+pad(m)+s; };
+const ampm = t => { const [h,m] = t.split(":").map(Number); return ((h%12)||12)+":"+pad(m)+(h<12?"am":"pm"); };
 const dateLabel = iso => { const [y,mo,d] = iso.split("-").map(Number); return new Date(y,mo-1,d).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}); };
 const shortDate = iso => { const [y,mo,d] = iso.split("-").map(Number); return new Date(y,mo-1,d).toLocaleDateString("en-US",{weekday:"short",month:"numeric",day:"numeric"}); };
-
-/* ---------- candidate identity ---------- */
 const nameKey = (f,l) => (f+" "+l).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
-const last4 = p => { const d = String(p||"").replace(/\D/g,""); return d.slice(-4); };
-// Compact SHA-256 so the token is identical on admin and candidate sides without needing crypto.subtle.
+const last4 = p => String(p||"").replace(/\D/g,"").slice(-4);
 function sha256(str){
   const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
   let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
@@ -349,175 +321,148 @@ function sha256(str){
   return H.map(x=>x.toString(16).padStart(8,"0")).join("");
 }
 const candToken = (f,l,p4) => sha256(nameKey(f,l)+"|"+p4);
+const icsEsc = s => String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");
+const icsFold = l => { if(l.length<=75) return l; let o=l.slice(0,75), r=l.slice(75); while(r.length>74){o+="\r\n "+r.slice(0,74); r=r.slice(74);} return o+(r?"\r\n "+r:""); };
+const download = (name, content, type) => { const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); };
+
+function buildIcs(events){
+  const stamp = new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+Z$/,"Z");
+  const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Dossani Paradise//Interview Scheduler//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
+  events.forEach(e => {
+    const D = e.date.replace(/-/g,""), st = e.time.replace(":","")+"00", en = fromMin(toMin(e.time)+(e.len||30)).replace(":","")+"00";
+    lines.push("BEGIN:VEVENT","UID:"+e.uid+"@dossaniparadise","DTSTAMP:"+stamp,"DTSTART:"+D+"T"+st,"DTEND:"+D+"T"+en,
+      "SUMMARY:"+icsEsc(e.summary),"DESCRIPTION:"+icsEsc(e.description||""),"LOCATION:"+icsEsc(e.location||""),
+      "BEGIN:VALARM","TRIGGER:-PT10M","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(e.summary),"END:VALARM","END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  return lines.map(icsFold).join("\r\n");
+}
 
 /* ============================================================
-   CANDIDATE FLOW
+   CANDIDATE
    ============================================================ */
 const C = {
-  step: 1, jobs: [], questions: [], slots: [], unsub: null,
-  data: { firstName:"", lastName:"", phone:"", job:"", answers:{}, slotId:"", candidateId:"" },
-  booked: null, fails: 0, lockedUntil: 0,
+  step:1, jobs:[], questions:[], slots:[], unsub:null, fails:0, lockedUntil:0, booked:null,
+  data:{ firstName:"", lastName:"", phone:"", job:"", jobTitle:"", answers:{}, slotId:"", candidateId:"" },
 
   async init(){
     $("candidateView").style.display = "block";
     try{
-      const [j, q] = await Promise.all([db.doc("config/jobs").get(), db.doc("config/questions").get()]);
-      this.jobs = (j.exists && j.data().list) || [];
-      this.questions = (q.exists && q.data().list) || [];
+      const [j,q] = await Promise.all([db.doc("config/jobs").get(), db.doc("config/questions").get()]);
+      this.jobs = (j.exists && j.data().list) || []; this.questions = (q.exists && q.data().list) || [];
     }catch(e){ console.warn(e); }
-    this.unsub = db.collection("slots").where("date", ">=", todayIso()).onSnapshot(snap => {
-      this.slots = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-      if(this.step === 4) this.renderSlots();
-    }, e => console.warn(e));
     this.show(1);
   },
-
   show(n){
-    this.step = n;
-    ["s0","s1","s2","s3","s4","s5"].forEach(id => $(id).style.display = "none");
-    $("s"+n).style.display = "block";
-    $("stepLabel").textContent = n>=1 && n<=4 ? `Step ${n} of 4` : "";
-    if(n===2) this.renderJobs();
-    if(n===3) this.renderQuestions();
-    if(n===4) this.renderSlots();
-    window.scrollTo({ top:0 });
-  },
-  back(n){ this.show(n-1); },
-
-  next(n){
-    if(n===1){ this.verify(); return; }
-    if(n===2){
-      const sel = document.querySelector('input[name="job"]:checked');
-      if(!sel){ $("e2").textContent = "Pick the position you applied for."; return; }
-      $("e2").textContent = ""; this.data.job = sel.value; this.show(3);
-    }
-    if(n===3){
-      const qs = this.activeQuestions();
-      const answers = {};
-      for(const q of qs){
-        let v;
-        if(q.type === "text") v = ($("q_"+q.id).value || "").trim();
-        else if(q.type === "mc"){ const c = document.querySelector(`input[name="q_${q.id}"]:checked`); v = c ? c.value : ""; }
-        else { v = [...document.querySelectorAll(`input[name="q_${q.id}"]:checked`)].map(x => x.value); }
-        const empty = Array.isArray(v) ? v.length===0 : !v;
-        if(q.required && empty){ $("e3").textContent = "Please answer every required question."; const w=$("q_wrap_"+q.id); if(w&&w.scrollIntoView) w.scrollIntoView({block:"center"}); return; }
-        answers[q.id] = { question:q.text, answer:v };
-      }
-      $("e3").textContent = ""; this.data.answers = answers; this.show(4);
-    }
+    this.step = n; ["s1","s3","s4","s5"].forEach(id => $(id).style.display = "none"); $("s"+n).style.display = "block";
+    const map = {1:"Step 1 of 3",3:"Step 2 of 3",4:"Step 3 of 3",5:""}; $("stepLabel").textContent = map[n] || "";
+    if(n===3){ $("jobTag3").textContent = this.data.jobTitle; this.renderQuestions(); }
+    if(n===4){ $("jobTag4").textContent = this.data.jobTitle; this.watchSlots(); this.renderSlots(); }
+    window.scrollTo({top:0});
   },
 
   async verify(){
-    const fn = $("fn").value.trim(), ln = $("ln").value.trim(), p4 = $("p4").value.trim();
-    const e = $("e1"), btn = $("verifyBtn");
-    if(Date.now() < this.lockedUntil){ e.textContent = "Too many attempts. Please wait a minute and try again."; return; }
-    if(!fn || !ln){ e.textContent = "Please enter your first and last name."; return; }
-    if(!/^\d{4}$/.test(p4)){ e.textContent = "Enter the last 4 digits of your phone number."; return; }
-    e.textContent = ""; btn.disabled = true; btn.textContent = "Checking\u2026";
-    const id = candToken(fn, ln, p4);
+    const fn=$("fn").value.trim(), ln=$("ln").value.trim(), p4=$("p4").value.trim(), e=$("e1"), btn=$("verifyBtn");
+    if(Date.now() < this.lockedUntil){ e.textContent="Too many attempts. Please wait a minute and try again."; return; }
+    if(!fn||!ln){ e.textContent="Please enter your first and last name."; return; }
+    if(!/^\d{4}$/.test(p4)){ e.textContent="Enter the last 4 digits of your phone number."; return; }
+    e.textContent=""; btn.disabled=true; btn.textContent="Checking\u2026";
+    const id = candToken(fn,ln,p4);
     try{
       const d = await db.collection("candidates").doc(id).get();
       if(!d.exists){
         this.fails++;
-        if(this.fails >= 5){ this.lockedUntil = Date.now() + 60000; this.fails = 0; e.textContent = "Too many attempts. Please wait a minute and try again."; }
-        else e.textContent = "We couldn't find that name and number together. Check the spelling matches your application, or contact the person who sent you this link.";
+        if(this.fails>=5){ this.lockedUntil=Date.now()+60000; this.fails=0; e.textContent="Too many attempts. Please wait a minute and try again."; }
+        else e.textContent="We couldn't find that name and number together. Check the spelling matches your application, or contact the person who sent you this link.";
         return;
       }
       const c = d.data();
-      if(c.used){ e.textContent = "You've already booked a time. If you need to change it, contact us and we'll move it."; return; }
-      Object.assign(this.data, { firstName:c.firstName || fn, lastName:c.lastName || ln, phone:c.phone || "", candidateId:id });
-      if(!this.jobs.length){ this.data.job = ""; this.show(3); return; }
-      this.show(2);
-    }catch(err){ console.error(err); e.textContent = "Couldn't check your details right now. Please try again in a moment."; }
-    finally{ btn.disabled = false; btn.textContent = "Continue"; }
+      if(c.used){ e.textContent="You've already booked a time. If you need to change it, contact us and we'll move it."; return; }
+      const job = this.jobs.find(j => j.id === c.job);
+      Object.assign(this.data, { firstName:c.firstName||fn, lastName:c.lastName||ln, phone:c.phone||"", candidateId:id, job:c.job||"", jobTitle:(job&&job.title)||c.jobTitle||"" });
+      this.show(3);
+    }catch(err){ console.error(err); e.textContent="Couldn't check your details right now. Please try again in a moment."; }
+    finally{ btn.disabled=false; btn.textContent="Continue"; }
   },
-
-  renderJobs(){
-    $("jobList").innerHTML = this.jobs.map((j,i) => `
-      <label class="choice ${this.data.job===j?'sel':''}"><input type="radio" name="job" value="${esc(j)}" ${this.data.job===j?'checked':''} onchange="C.pick(this)">${esc(j)}</label>`).join("");
-  },
-  pick(el){ document.querySelectorAll('#jobList .choice').forEach(c => c.classList.remove('sel')); el.closest('.choice').classList.add('sel'); },
 
   activeQuestions(){ return this.questions.filter(q => !q.job || q.job === this.data.job); },
-
   renderQuestions(){
     const qs = this.activeQuestions();
     if(!qs.length){ $("qList").innerHTML = `<p class="muted">No questions for this position — go ahead and pick a time.</p>`; return; }
     $("qList").innerHTML = qs.map(q => {
       const req = q.required ? `<span class="req">*</span>` : "";
-      if(q.type === "text") return `<div class="q" id="q_wrap_${q.id}"><div class="qt">${esc(q.text)}${req}</div><textarea id="q_${q.id}"></textarea></div>`;
-      const t = q.type === "mc" ? "radio" : "checkbox";
-      return `<div class="q" id="q_wrap_${q.id}"><div class="qt">${esc(q.text)}${req}</div>${(q.options||[]).map(o =>
-        `<label class="choice"><input type="${t}" name="q_${q.id}" value="${esc(o)}" onchange="C.pickQ(this,'${t}')">${esc(o)}</label>`).join("")}</div>`;
+      if(q.type==="text") return `<div class="q" id="q_wrap_${q.id}"><div class="qt">${esc(q.text)}${req}</div><textarea id="q_${q.id}"></textarea></div>`;
+      const t = q.type==="mc" ? "radio" : "checkbox";
+      return `<div class="q" id="q_wrap_${q.id}"><div class="qt">${esc(q.text)}${req}</div>${(q.options||[]).map(o => `<label class="choice"><input type="${t}" name="q_${q.id}" value="${esc(o)}" onchange="C.pickQ(this,'${t}')">${esc(o)}</label>`).join("")}</div>`;
     }).join("");
   },
-  pickQ(el, t){
-    if(t === "radio") el.closest('.q').querySelectorAll('.choice').forEach(c => c.classList.remove('sel'));
-    el.closest('.choice').classList.toggle('sel', el.checked);
+  pickQ(el,t){ if(t==="radio") el.closest('.q').querySelectorAll('.choice').forEach(c => c.classList.remove('sel')); el.closest('.choice').classList.toggle('sel', el.checked); },
+  next(n){
+    if(n!==3) return;
+    const answers = {};
+    for(const q of this.activeQuestions()){
+      let v;
+      if(q.type==="text") v = ($("q_"+q.id).value||"").trim();
+      else if(q.type==="mc"){ const c = document.querySelector(`input[name="q_${q.id}"]:checked`); v = c ? c.value : ""; }
+      else v = [...document.querySelectorAll(`input[name="q_${q.id}"]:checked`)].map(x => x.value);
+      const empty = Array.isArray(v) ? !v.length : !v;
+      if(q.required && empty){ $("e3").textContent="Please answer every required question."; const w=$("q_wrap_"+q.id); if(w&&w.scrollIntoView) w.scrollIntoView({block:"center"}); return; }
+      answers[q.id] = { question:q.text, answer:v };
+    }
+    $("e3").textContent=""; this.data.answers = answers; this.show(4);
   },
 
-  renderSlots(){
-    const today = todayIso(), nm = nowMin();
-    const usable = this.slots.filter(s => s.date > today || (s.date === today && toMin(s.time) > nm));
-    if(!usable.length){ $("slotList").innerHTML = `<p class="muted">No interview times are open right now. Please check back soon or contact us.</p>`; $("bookBtn").disabled = true; return; }
-    $("bookBtn").disabled = false;
-    const byDate = {};
-    usable.forEach(s => (byDate[s.date] = byDate[s.date] || []).push(s));
-    $("slotList").innerHTML = Object.keys(byDate).sort().map(d => `
-      <div class="day"><h3>${dateLabel(d)}</h3><div class="times">${byDate[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s =>
-        s.booked
-          ? `<button class="slot taken" disabled>${ampm(s.time)}<small>unavailable</small></button>`
-          : `<button class="slot ${this.data.slotId===s.id?'sel':''}" onclick="C.pickSlot('${s.id}')">${ampm(s.time)}</button>`).join("")}</div></div>`).join("");
+  watchSlots(){
+    if(this.unsub) return;
+    // Equality filter only — date is filtered client-side so no composite index is needed.
+    this.unsub = db.collection("slots").where("job","==",this.data.job).onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id,...d.data()})); if(this.step===4) this.renderSlots(); }, e => console.warn(e));
   },
-  pickSlot(id){ this.data.slotId = id; this.renderSlots(); $("e4").textContent = ""; },
+  renderSlots(){
+    const t = todayIso(), nm = nowMin();
+    const usable = this.slots.filter(s => s.date > t || (s.date===t && toMin(s.time) > nm));
+    if(!usable.length){ $("slotList").innerHTML = `<p class="muted">No interview times are open for this position right now. Please check back soon or contact us.</p>`; $("bookBtn").disabled=true; return; }
+    $("bookBtn").disabled=false;
+    const len = usable[0].length || 30; $("slotLead").textContent = `Each slot is ${len} minutes. Times shown are Central (Texas). Crossed-out times are already taken.`;
+    const by = {}; usable.forEach(s => (by[s.date]=by[s.date]||[]).push(s));
+    $("slotList").innerHTML = Object.keys(by).sort().map(d => `<div class="day"><h3>${dateLabel(d)}</h3><div class="times">${by[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s =>
+      s.booked ? `<button class="slot taken" disabled>${ampm(s.time)}<small>unavailable</small></button>`
+               : `<button class="slot ${this.data.slotId===s.id?'sel':''}" onclick="C.pickSlot('${s.id}')">${ampm(s.time)}</button>`).join("")}</div></div>`).join("");
+  },
+  pickSlot(id){ this.data.slotId=id; this.renderSlots(); $("e4").textContent=""; },
 
   async submit(){
-    if(!this.data.slotId){ $("e4").textContent = "Pick a time first."; return; }
-    const btn = $("bookBtn"); btn.disabled = true; btn.textContent = "Booking…";
-    const slotRef = db.collection("slots").doc(this.data.slotId);
-    const candRef = db.collection("candidates").doc(this.data.candidateId);
-    const respRef = db.collection("responses").doc();
-    const who = this.data.firstName + " " + this.data.lastName;
+    if(!this.data.slotId){ $("e4").textContent="Pick a time first."; return; }
+    const btn=$("bookBtn"); btn.disabled=true; btn.textContent="Booking\u2026";
+    const slotRef=db.collection("slots").doc(this.data.slotId), candRef=db.collection("candidates").doc(this.data.candidateId), respRef=db.collection("responses").doc();
+    const who=this.data.firstName+" "+this.data.lastName;
     try{
       let slotData;
       await db.runTransaction(async tx => {
-        const [s, c] = await Promise.all([tx.get(slotRef), tx.get(candRef)]);
+        const [s,c] = await Promise.all([tx.get(slotRef), tx.get(candRef)]);
         if(!c.exists || c.data().used) throw new Error("used");
         if(!s.exists) throw new Error("gone");
         if(s.data().booked) throw new Error("taken");
         slotData = s.data();
-        tx.set(respRef, {
-          candidateId:this.data.candidateId,
-          firstName:this.data.firstName, lastName:this.data.lastName, phone:this.data.phone,
-          job:this.data.job, answers:this.data.answers, slotId:this.data.slotId,
-          slotDate:slotData.date, slotTime:slotData.time, createdAt:TS()
-        });
+        tx.set(respRef, { candidateId:this.data.candidateId, firstName:this.data.firstName, lastName:this.data.lastName, phone:this.data.phone,
+          job:this.data.job, jobTitle:this.data.jobTitle, answers:this.data.answers, slotId:this.data.slotId, slotDate:slotData.date, slotTime:slotData.time,
+          slotLength:slotData.length||30, staff:slotData.staff||[], createdAt:TS() });
         tx.update(slotRef, { booked:true, bookedBy:who, responseId:respRef.id, candidateId:this.data.candidateId, bookedAt:TS() });
         tx.update(candRef, { used:true, responseId:respRef.id, usedAt:TS() });
       });
       this.booked = { ...slotData, who };
-      $("doneSlot").textContent = dateLabel(slotData.date) + " at " + ampm(slotData.time) + " Central";
-      $("doneWho").textContent = who + (this.data.job ? " · " + this.data.job : "");
+      $("doneSlot").textContent = dateLabel(slotData.date)+" at "+ampm(slotData.time)+" Central";
+      $("doneWho").textContent = who+" \u00b7 "+this.data.jobTitle;
       this.show(5);
     }catch(e){
-      btn.disabled = false; btn.textContent = "Book this time";
-      if(e.message === "used"){ $("e4").textContent = "This link has already been used to book a time. Contact us if you need to change it."; }
-      else if(e.message === "taken"){ $("e4").textContent = "Sorry — someone just took that time. Please pick another."; this.data.slotId = ""; this.renderSlots(); }
-      else if(e.message === "gone"){ $("e4").textContent = "That time is no longer available. Please pick another."; this.data.slotId = ""; this.renderSlots(); }
-      else { $("e4").textContent = "Couldn't save your booking. Please try again."; console.error(e); }
+      btn.disabled=false; btn.textContent="Book this time";
+      const m = { used:"This link has already been used to book a time. Contact us if you need to change it.", taken:"Sorry \u2014 someone just took that time. Please pick another.", gone:"That time is no longer available. Please pick another." }[e.message];
+      $("e4").textContent = m || "Couldn't save your booking. Please try again."; if(!m) console.error(e);
+      if(m && e.message!=="used"){ this.data.slotId=""; this.renderSlots(); }
     }
   },
-
   downloadIcs(){
-    if(!this.booked) return;
-    const b = this.booked, D = b.date.replace(/-/g,""), st = fromMin(toMin(b.time)), en = fromMin(toMin(b.time)+30);
-    const f = t => t.replace(":","")+"00";
-    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Dossani Paradise//Scheduler//EN","BEGIN:VEVENT",
-      "UID:"+D+f(st)+"@dossaniparadise","DTSTAMP:"+D+"T"+f(st),"DTSTART:"+D+"T"+f(st),"DTEND:"+D+"T"+f(en),
-      "SUMMARY:Interview \u2014 Dossani Paradise"+(this.data.job?" ("+this.data.job+")":""),
-      "DESCRIPTION:Phone interview with Dossani Paradise.","END:VEVENT","END:VCALENDAR"].join("\r\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([ics],{type:"text/calendar"})); a.download = "dossani-interview.ics"; a.click();
+    if(!this.booked) return; const b=this.booked;
+    download("dossani-interview.ics", buildIcs([{ uid:"cand-"+b.date+b.time, date:b.date, time:b.time, len:b.length||30, summary:"Interview \u2014 Dossani Paradise ("+this.data.jobTitle+")", description:"Phone interview with Dossani Paradise. We'll call you at "+this.data.phone+"." }]), "text/calendar");
   }
 };
 
@@ -525,242 +470,294 @@ const C = {
    ADMIN
    ============================================================ */
 const A = {
-  jobs: [], questions: [], slots: [], responses: [], candidates: [], editingId: null, unsubs: [],
+  me:null, jobs:[], questions:[], slots:[], responses:[], candidates:[], staff:[], editingId:null, unsubs:[],
 
   init(){
-    $("adminView").style.display = "block";
-    auth.onAuthStateChanged(u => {
-      if(u){ $("adminLogin").style.display = "none"; $("adminApp").style.display = "block"; $("whoami").textContent = u.email; $("logoutBtn").style.display = ""; this.subscribe(); }
-      else { $("adminLogin").style.display = "block"; $("adminApp").style.display = "none"; $("whoami").textContent = ""; $("logoutBtn").style.display = "none"; this.unsubscribe(); }
+    $("adminView").style.display="block";
+    auth.onAuthStateChanged(async u => {
+      this.me = u;
+      if(u){
+        $("adminLogin").style.display="none"; $("adminApp").style.display="block"; $("whoami").textContent=u.email; $("logoutBtn").style.display="";
+        // Auto-register this staff member so they can be assigned to slots.
+        try{ await db.collection("staff").doc(u.uid).set({ email:u.email, name:u.displayName||u.email.split("@")[0], uid:u.uid, lastSeen:TS() }, { merge:true }); }catch(e){ console.warn(e); }
+        this.subscribe();
+      }else{ $("adminLogin").style.display="block"; $("adminApp").style.display="none"; $("whoami").textContent=""; $("logoutBtn").style.display="none"; this.unsubscribe(); }
     });
-    $("aPass").addEventListener("keydown", e => { if(e.key === "Enter") this.login(); });
-    const t = todayIso(); $("gFrom").value = t; $("gTo").value = t;
+    $("aPass").addEventListener("keydown", e => { if(e.key==="Enter") this.login(); });
+    const t = todayIso(); $("gFrom").value=t; $("gTo").value=t;
   },
-  async login(){
-    $("aErr").textContent = "";
-    try{ await auth.signInWithEmailAndPassword($("aEmail").value.trim(), $("aPass").value); }
-    catch(e){ $("aErr").textContent = "Sign-in failed. Check the email and password."; }
-  },
+  async login(){ $("aErr").textContent=""; try{ await auth.signInWithEmailAndPassword($("aEmail").value.trim(), $("aPass").value); }catch(e){ $("aErr").textContent="Sign-in failed. Check the email and password."; } },
   logout(){ auth.signOut(); },
-  tab(t){
-    document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
-    document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === "p-"+t));
-  },
+  tab(t){ document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t===t)); document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id==="p-"+t)); },
 
   subscribe(){
     this.unsubscribe();
-    this.unsubs.push(db.doc("config/jobs").onSnapshot(d => { this.jobs = (d.exists && d.data().list) || []; this.renderJobs(); this.fillJobSelects(); }));
-    this.unsubs.push(db.doc("config/questions").onSnapshot(d => { this.questions = (d.exists && d.data().list) || []; this.renderQuestions(); }));
-    this.unsubs.push(db.collection("slots").onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id, ...d.data()})); this.renderSlots(); }));
-    this.unsubs.push(db.collection("candidates").onSnapshot(s => { this.candidates = s.docs.map(d => ({id:d.id, ...d.data()})); this.renderCandidates(); },
-      e => { $("candAdmin").innerHTML = `<p class="err">Can't read candidates: ${esc(e.message)}</p>`; }));
-    this.unsubs.push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id, ...d.data()})); this.renderResponses(); },
-      e => { $("respList").innerHTML = `<p class="err">Can't read responses: ${esc(e.message)}</p>`; }));
+    const push = (u) => this.unsubs.push(u);
+    push(db.doc("config/jobs").onSnapshot(d => { this.jobs = ((d.exists && d.data().list) || []).map(j => typeof j==="string" ? {id:"legacy_"+nameKey(j,""),title:j} : j); this.renderJobs(); this.fillJobSelects(); this.renderSetup(); }));
+    push(db.doc("config/questions").onSnapshot(d => { this.questions = (d.exists && d.data().list) || []; this.renderQuestions(); }));
+    push(db.collection("staff").onSnapshot(s => { this.staff = s.docs.map(d => ({id:d.id,...d.data()})); this.renderStaff(); this.fillStaffPick(); }));
+    push(db.collection("candidates").onSnapshot(s => { this.candidates = s.docs.map(d => ({id:d.id,...d.data()})); this.renderCandidates(); this.renderSetup(); }, e => $("candAdmin").innerHTML=`<p class="err">Can't read candidates: ${esc(e.message)}</p>`));
+    push(db.collection("slots").onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id,...d.data()})); this.renderSlots(); this.renderInterviews(); this.renderSetup(); }));
+    push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id,...d.data()})); this.renderInterviews(); }, e => $("intList").innerHTML=`<p class="err">Can't read responses: ${esc(e.message)}</p>`));
   },
-  unsubscribe(){ this.unsubs.forEach(u => u()); this.unsubs = []; },
+  unsubscribe(){ this.unsubs.forEach(u => u()); this.unsubs=[]; },
 
-  /* ----- approved candidates ----- */
+  jobTitle(id){ const j = this.jobs.find(x => x.id===id); return j ? j.title : (id||""); },
+  fillJobSelects(){
+    const opts = this.jobs.map(j => `<option value="${esc(j.id)}">${esc(j.title)}</option>`).join("");
+    const none = this.jobs.length ? "" : `<option value="">Add a job posting first</option>`;
+    $("candJob").innerHTML = none+opts; $("gJob").innerHTML = none+opts;
+    $("qJob").innerHTML = `<option value="">All postings</option>`+opts;
+    ["candFilterJob","slotFilterJob","intJob"].forEach(id => $(id).innerHTML = `<option value="">All postings</option>`+opts);
+    const blocked = !this.jobs.length; $("candForm").classList.toggle("blocked", blocked); $("slotForm").classList.toggle("blocked", blocked);
+    this.previewSlots();
+  },
+  renderSetup(){
+    const s1 = this.jobs.length>0, s2 = this.candidates.length>0, s3 = this.slots.length>0;
+    const li = (done, now, text) => `<li class="${done?'done':(now?'now':'')}">${text}</li>`;
+    $("setupBox").innerHTML = (s1&&s2&&s3)
+      ? `<strong>Ready.</strong> <span class="muted">Share the candidate link. Booked interviews appear under Interviews.</span>`
+      : `<strong>Setup</strong><ol>${li(s1,!s1,"Add a job posting")}${li(s2,s1&&!s2,"Add approved candidates for that posting")}${li(s3,s1&&s2&&!s3,"Create time slots and assign interviewers")}</ol>`;
+  },
+
+  /* ----- jobs ----- */
+  async saveJobs(list){ await db.doc("config/jobs").set({ list, updatedAt:TS() }); },
+  async addJob(){
+    const v=$("jobNew").value.trim(); if(!v) return;
+    if(this.jobs.some(j => j.title.toLowerCase()===v.toLowerCase())){ $("jStatus").textContent="That posting is already listed."; return; }
+    await this.saveJobs([...this.jobs, { id:"j"+Date.now().toString(36), title:v }]); $("jobNew").value=""; $("jStatus").textContent="Added.";
+  },
+  async removeJob(i){
+    const j=this.jobs[i]; const n=this.candidates.filter(c=>c.job===j.id).length, m=this.slots.filter(s=>s.job===j.id).length;
+    if(!confirm(`Remove "${j.title}"?`+(n||m?`\n\n${n} candidate(s) and ${m} slot(s) are attached to it and will stay in the system but lose their posting.`:""))) return;
+    const l=this.jobs.slice(); l.splice(i,1); await this.saveJobs(l);
+  },
+  renderJobs(){
+    $("jobAdmin").innerHTML = this.jobs.length ? this.jobs.map((j,i) => `<div class="list-item"><span class="grow"><strong>${esc(j.title)}</strong><div class="muted">${this.candidates.filter(c=>c.job===j.id).length} candidates \u00b7 ${this.slots.filter(s=>s.job===j.id).length} slots</div></span><button class="danger small" onclick="A.removeJob(${i})">Remove</button></div>`).join("")
+      : `<p class="muted">No postings yet. Add one above to unlock candidates and slots.</p>`;
+  },
+
+  /* ----- candidates ----- */
   parseCandidates(text){
-    const out = [], bad = [];
-    text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).forEach(line => {
-      const parts = line.split(/\t|,/).map(x => x.trim()).filter(Boolean);
-      let name = "", phone = "";
-      // find the field that looks like a phone; everything else is name
-      const pi = parts.findIndex(x => x.replace(/\D/g,"").length >= 7);
-      if(pi >= 0){ phone = parts[pi]; name = parts.filter((_,i) => i !== pi).join(" "); }
-      else { // maybe "First Last 5551234567" with spaces
-        const m = line.match(/^(.*?)[\s,]+([\d\s().+-]{7,})$/); if(m){ name = m[1]; phone = m[2]; }
-      }
+    const out=[], bad=[];
+    text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach(line => {
+      const parts = line.split(/\t|,/).map(x=>x.trim()).filter(Boolean);
+      let name="", phone="";
+      const pi = parts.findIndex(x => x.replace(/\D/g,"").length>=7);
+      if(pi>=0){ phone=parts[pi]; name=parts.filter((_,i)=>i!==pi).join(" "); }
+      else { const m=line.match(/^(.*?)[\s,]+([\d\s().+-]{7,})$/); if(m){ name=m[1]; phone=m[2]; } }
       const words = name.replace(/\s+/g," ").trim().split(" ");
-      if(!phone || words.length < 2){ bad.push(line); return; }
-      const first = words.slice(0,-1).join(" "), last = words[words.length-1];
-      out.push({ firstName:first, lastName:last, phone:phone.trim(), last4:last4(phone) });
+      if(!phone || words.length<2){ bad.push(line); return; }
+      out.push({ firstName:words.slice(0,-1).join(" "), lastName:words[words.length-1], phone:phone.trim(), last4:last4(phone) });
     });
     return { out, bad };
   },
   async importCandidates(){
-    const st = $("cStatus");
+    const st=$("cStatus"), job=$("candJob").value;
+    if(!job){ st.textContent="Add a job posting first."; return; }
     const { out, bad } = this.parseCandidates($("candPaste").value);
     if(!out.length){ st.textContent = bad.length ? "Couldn't read any lines. Use: First Last, phone" : "Paste some names first."; return; }
-    const existing = new Set(this.candidates.map(c => c.id));
-    let added = 0, skipped = 0;
-    for(let i = 0; i < out.length; i += 400){
-      const b = db.batch();
+    const existing = new Set(this.candidates.map(c=>c.id)); let added=0, skipped=0;
+    for(let i=0;i<out.length;i+=400){
+      const b=db.batch();
       out.slice(i,i+400).forEach(c => {
-        const id = candToken(c.firstName, c.lastName, c.last4);
-        if(existing.has(id)){ skipped++; return; }
-        existing.add(id); added++;
-        b.set(db.collection("candidates").doc(id), { firstName:c.firstName, lastName:c.lastName, phone:c.phone, last4:c.last4, nameKey:nameKey(c.firstName,c.lastName), used:false, responseId:null, createdAt:TS() });
+        const id=candToken(c.firstName,c.lastName,c.last4);
+        if(existing.has(id)){ skipped++; return; } existing.add(id); added++;
+        b.set(db.collection("candidates").doc(id), { firstName:c.firstName, lastName:c.lastName, phone:c.phone, last4:c.last4, nameKey:nameKey(c.firstName,c.lastName), job, jobTitle:this.jobTitle(job), used:false, responseId:null, resumePath:null, resumeUrl:null, resumeName:null, createdAt:TS() });
       });
       await b.commit();
     }
-    $("candPaste").value = "";
-    st.textContent = `Added ${added}` + (skipped ? `, skipped ${skipped} already on the list` : "") + (bad.length ? `. Couldn't read ${bad.length} line${bad.length===1?"":"s"}: ${bad.slice(0,3).join(" | ")}` : ".");
+    $("candPaste").value="";
+    st.textContent = `Added ${added}`+(skipped?`, skipped ${skipped} already on the list`:"")+(bad.length?`. Couldn't read ${bad.length}: ${bad.slice(0,3).join(" | ")}`:".");
   },
-  async removeCandidate(id){ const c = this.candidates.find(x => x.id === id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; await db.collection("candidates").doc(id).delete(); },
+  async uploadResume(id, input){
+    const file = input.files && input.files[0]; if(!file) return;
+    if(file.size > 10*1024*1024){ alert("Resume must be under 10 MB."); return; }
+    const c=this.candidates.find(x=>x.id===id); const path=`resumes/${id}/${file.name}`;
+    const row=$("cres_"+id); if(row) row.textContent="Uploading\u2026";
+    try{
+      if(c && c.resumePath && c.resumePath!==path){ try{ await storage.ref(c.resumePath).delete(); }catch(e){} }
+      const snap = await storage.ref(path).put(file); const url = await snap.ref.getDownloadURL();
+      await db.collection("candidates").doc(id).update({ resumePath:path, resumeUrl:url, resumeName:file.name });
+    }catch(e){ alert("Upload failed: "+e.message); if(row) row.textContent="Upload failed"; }
+  },
+  async removeResume(id){
+    const c=this.candidates.find(x=>x.id===id); if(!c||!c.resumePath) return; if(!confirm("Remove this resume?")) return;
+    try{ await storage.ref(c.resumePath).delete(); }catch(e){}
+    await db.collection("candidates").doc(id).update({ resumePath:null, resumeUrl:null, resumeName:null });
+  },
+  async removeCandidate(id){ const c=this.candidates.find(x=>x.id===id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; if(c.resumePath){ try{ await storage.ref(c.resumePath).delete(); }catch(e){} } await db.collection("candidates").doc(id).delete(); },
   async resetCandidate(id){ if(!confirm("Let this person book again? Their earlier response is kept.")) return; await db.collection("candidates").doc(id).update({ used:false, responseId:null, usedAt:null }); },
   renderCandidates(){
-    const q = ($("candSearch").value || "").toLowerCase();
-    const list = this.candidates.filter(c => !q || (c.firstName+" "+c.lastName+" "+c.phone).toLowerCase().includes(q))
-      .sort((a,b) => (a.lastName+a.firstName).localeCompare(b.lastName+b.firstName));
-    const used = this.candidates.filter(c => c.used).length;
-    $("candSummary").textContent = `${this.candidates.length} approved · ${used} booked · ${this.candidates.length-used} not yet`;
-    if(!this.candidates.length){ $("candAdmin").innerHTML = `<p class="muted">Nobody on the list yet. Until you add names, no one can book.</p>`; return; }
-    if(!list.length){ $("candAdmin").innerHTML = `<p class="muted">No matches.</p>`; return; }
-    $("candAdmin").innerHTML = `<table><thead><tr><th>Name</th><th>Phone</th><th>Status</th><th></th></tr></thead><tbody>${list.map(c => `
-      <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td>
+    const q=($("candSearch").value||"").toLowerCase(), jf=$("candFilterJob").value;
+    const list=this.candidates.filter(c => (!jf||c.job===jf) && (!q||(c.firstName+" "+c.lastName+" "+c.phone).toLowerCase().includes(q))).sort((a,b)=>(a.lastName+a.firstName).localeCompare(b.lastName+b.firstName));
+    const used=this.candidates.filter(c=>c.used).length; $("nCand").textContent=this.candidates.length;
+    $("candSummary").textContent=`${this.candidates.length} approved \u00b7 ${used} booked \u00b7 ${this.candidates.length-used} not yet`;
+    if(!this.candidates.length){ $("candAdmin").innerHTML=`<p class="muted">Nobody on the list yet. Until you add names, no one can book.</p>`; return; }
+    if(!list.length){ $("candAdmin").innerHTML=`<p class="muted">No matches.</p>`; return; }
+    $("candAdmin").innerHTML=`<table><thead><tr><th>Name</th><th>Phone</th><th>Posting</th><th>Resume</th><th>Status</th><th></th></tr></thead><tbody>${list.map(c=>`
+      <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td><td><span class="pill grey">${esc(this.jobTitle(c.job))}</span></td>
+      <td id="cres_${c.id}">${c.resumeUrl?`<a href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">${esc(c.resumeName||"Open")}</a> <button class="quiet small" onclick="A.removeResume('${c.id}')">\u2715</button>`:`<span class="file-btn"><button class="quiet small">Attach</button><input type="file" accept=".pdf,.doc,.docx" onchange="A.uploadResume('${c.id}',this)"></span>`}</td>
       <td>${c.used?'<span class="pill booked">Booked</span>':'<span class="pill open">Not yet</span>'}</td>
-      <td style="text-align:right">${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
+      <td style="text-align:right;white-space:nowrap">${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
   },
 
-  /* ----- jobs ----- */
-  fillJobSelects(){
-    const opts = this.jobs.map(j => `<option value="${esc(j)}">${esc(j)}</option>`).join("");
-    $("qJob").innerHTML = `<option value="">All jobs</option>` + opts;
-    $("respJobFilter").innerHTML = `<option value="">All jobs</option>` + opts;
+  /* ----- staff ----- */
+  fillStaffPick(){
+    $("gStaff").innerHTML = this.staff.length ? this.staff.map(s => `<label><input type="checkbox" value="${esc(s.email)}" ${this.me&&s.email===this.me.email?'checked':''}>${esc(s.name||s.email)}</label>`).join("") : `<span class="muted">No staff yet \u2014 add them on the Staff tab.</span>`;
   },
-  renderJobs(){
-    $("jobAdmin").innerHTML = this.jobs.length ? this.jobs.map((j,i) => `
-      <div class="list-item"><span class="grow">${esc(j)}</span>
-        <button class="quiet small" onclick="A.moveJob(${i},-1)" ${i===0?'disabled':''}>↑</button>
-        <button class="quiet small" onclick="A.moveJob(${i},1)" ${i===this.jobs.length-1?'disabled':''}>↓</button>
-        <button class="danger small" onclick="A.removeJob(${i})">Remove</button></div>`).join("")
-      : `<p class="muted">No job postings yet. Add one above — candidates won't see the job step until there's at least one.</p>`;
+  async addStaff(){
+    const name=$("stName").value.trim(), email=$("stEmail").value.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $("stStatus").textContent="Enter a valid email."; return; }
+    if(this.staff.some(s=>(s.email||"").toLowerCase()===email)){ $("stStatus").textContent="Already listed."; return; }
+    await db.collection("staff").doc("pre_"+sha256(email).slice(0,20)).set({ email, name:name||email.split("@")[0], addedAt:TS() });
+    $("stName").value=""; $("stEmail").value=""; $("stStatus").textContent="Added.";
   },
-  async saveJobs(list){ await db.doc("config/jobs").set({ list, updatedAt:TS() }); },
-  async addJob(){
-    const v = $("jobNew").value.trim(); if(!v) return;
-    if(this.jobs.includes(v)){ $("jStatus").textContent = "That job is already listed."; return; }
-    await this.saveJobs([...this.jobs, v]); $("jobNew").value = ""; $("jStatus").textContent = "Added.";
-  },
-  async removeJob(i){ if(!confirm(`Remove "${this.jobs[i]}"?`)) return; const l = this.jobs.slice(); l.splice(i,1); await this.saveJobs(l); },
-  async moveJob(i,d){ const l = this.jobs.slice(); const [x] = l.splice(i,1); l.splice(i+d,0,x); await this.saveJobs(l); },
-
-  /* ----- questions ----- */
-  qTypeChanged(){ const t = $("qType").value; $("qOptsWrap").style.display = t==="text" ? "none" : "block"; if(t!=="text" && !$("qOpts").children.length){ this.addOpt(); this.addOpt(); } },
-  addOpt(v=""){ const d = document.createElement("div"); d.className = "opt-row"; d.innerHTML = `<input value="${esc(v)}" placeholder="Choice"><button class="quiet small" onclick="this.parentNode.remove()">✕</button>`; $("qOpts").appendChild(d); },
-  readOpts(){ return [...$("qOpts").querySelectorAll("input")].map(i => i.value.trim()).filter(Boolean); },
-  async saveQuestions(list){ await db.doc("config/questions").set({ list, updatedAt:TS() }); },
-  async saveQuestion(){
-    const text = $("qText").value.trim(), type = $("qType").value, job = $("qJob").value, required = $("qReq").value === "1";
-    if(!text){ $("qStatus").textContent = "Enter the question text."; return; }
-    const options = type === "text" ? [] : this.readOpts();
-    if(type !== "text" && options.length < 2){ $("qStatus").textContent = "Add at least two choices."; return; }
-    const list = this.questions.slice();
-    if(this.editingId){ const i = list.findIndex(q => q.id === this.editingId); list[i] = { ...list[i], text, type, job, required, options }; }
-    else list.push({ id: "q"+Date.now().toString(36), text, type, job, required, options });
-    await this.saveQuestions(list); this.cancelEdit(); $("qStatus").textContent = "Saved.";
-  },
-  editQuestion(id){
-    const q = this.questions.find(x => x.id === id); if(!q) return;
-    this.editingId = id; $("qFormTitle").textContent = "Edit question"; $("qSaveBtn").textContent = "Save changes"; $("qCancelBtn").style.display = "";
-    $("qText").value = q.text; $("qType").value = q.type; $("qJob").value = q.job || ""; $("qReq").value = q.required ? "1" : "0";
-    $("qOpts").innerHTML = ""; (q.options||[]).forEach(o => this.addOpt(o)); this.qTypeChanged();
-    window.scrollTo({ top:0 });
-  },
-  cancelEdit(){ this.editingId = null; $("qFormTitle").textContent = "Add a question"; $("qSaveBtn").textContent = "Add question"; $("qCancelBtn").style.display = "none"; $("qText").value = ""; $("qType").value = "text"; $("qJob").value = ""; $("qReq").value = "1"; $("qOpts").innerHTML = ""; this.qTypeChanged(); },
-  async removeQuestion(id){ if(!confirm("Delete this question?")) return; await this.saveQuestions(this.questions.filter(q => q.id !== id)); },
-  async moveQuestion(i,d){ const l = this.questions.slice(); const [x] = l.splice(i,1); l.splice(i+d,0,x); await this.saveQuestions(l); },
-  renderQuestions(){
-    const typeName = { text:"Free response", mc:"Multiple choice", multi:"Checkboxes" };
-    $("qAdmin").innerHTML = this.questions.length ? this.questions.map((q,i) => `
-      <div class="list-item" style="align-items:flex-start">
-        <div class="grow"><div>${esc(q.text)}${q.required?' <span class="req" style="color:var(--red)">*</span>':''}</div>
-          <div class="muted">${typeName[q.type]||q.type} · ${q.job ? esc(q.job) : "All jobs"}${q.options&&q.options.length ? " · " + q.options.map(esc).join(" / ") : ""}</div></div>
-        <button class="quiet small" onclick="A.moveQuestion(${i},-1)" ${i===0?'disabled':''}>↑</button>
-        <button class="quiet small" onclick="A.moveQuestion(${i},1)" ${i===this.questions.length-1?'disabled':''}>↓</button>
-        <button class="quiet small" onclick="A.editQuestion('${q.id}')">Edit</button>
-        <button class="danger small" onclick="A.removeQuestion('${q.id}')">Delete</button></div>`).join("")
-      : `<p class="muted">No questions yet. Candidates will go straight from the job step to picking a time.</p>`;
+  async removeStaff(id){ const s=this.staff.find(x=>x.id===id); if(!confirm(`Remove ${s.name||s.email} from the staff list? This doesn't delete their sign-in.`)) return; await db.collection("staff").doc(id).delete(); },
+  renderStaff(){
+    $("staffAdmin").innerHTML = this.staff.length ? this.staff.map(s=>`<div class="list-item"><span class="grow"><strong>${esc(s.name||"")}</strong> <span class="muted">${esc(s.email)}</span>${s.uid?'':' <span class="pill grey">not signed in yet</span>'}</span><button class="danger small" onclick="A.removeStaff('${s.id}')">Remove</button></div>`).join("") : `<p class="muted">No staff listed yet.</p>`;
   },
 
   /* ----- slots ----- */
-  async generateSlots(){
-    const from = $("gFrom").value, to = $("gTo").value, start = $("gStart").value, end = $("gEnd").value, len = parseInt($("gLen").value,10)||30;
-    const dows = [...$("gDow").querySelectorAll("input:checked")].map(i => parseInt(i.value,10));
-    const st = $("gStatus");
-    if(!from || !to || from > to){ st.textContent = "Check the date range."; return; }
-    if(!start || !end || toMin(end) <= toMin(start)){ st.textContent = "End time must be after start time."; return; }
-    if(!dows.length){ st.textContent = "Pick at least one day of the week."; return; }
-    const existing = new Set(this.slots.map(s => s.id));
-    const toCreate = [];
-    const [fy,fm,fd] = from.split("-").map(Number), [ty,tm,td] = to.split("-").map(Number);
-    for(let d = new Date(fy,fm-1,fd); d <= new Date(ty,tm-1,td); d.setDate(d.getDate()+1)){
-      if(!dows.includes(d.getDay())) continue;
-      const iso = d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-      for(let m = toMin(start); m + len <= toMin(end); m += len){
-        const time = fromMin(m), id = iso+"_"+time.replace(":","");
-        if(!existing.has(id)) toCreate.push({ id, date:iso, time, length:len, booked:false, bookedBy:null, responseId:null });
-      }
+  slotPlan(){
+    const from=$("gFrom").value, to=$("gTo").value||from, start=$("gStart").value, end=$("gEnd").value, len=parseInt($("gLen").value,10)||30, job=$("gJob").value;
+    const dows=[...$("gDow").querySelectorAll("input:checked")].map(i=>parseInt(i.value,10));
+    if(!job||!from||!start||!end||from>to||toMin(end)<=toMin(start)||!dows.length) return { job, list:[], err:!job?"Pick a posting.":!from?"Pick a date.":from>to?"The to-date is before the from-date.":toMin(end)<=toMin(start)?"The window must end after it starts.":!dows.length?"Pick at least one weekday.":"" };
+    const existing=new Set(this.slots.map(s=>s.id)); const list=[];
+    const [fy,fm,fd]=from.split("-").map(Number), [ty,tm,td]=to.split("-").map(Number);
+    for(let d=new Date(fy,fm-1,fd); d<=new Date(ty,tm-1,td); d.setDate(d.getDate()+1)){
+      if(from!==to && !dows.includes(d.getDay())) continue;
+      const iso=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+      for(let m=toMin(start); m+len<=toMin(end); m+=len){ const time=fromMin(m), id=job+"_"+iso+"_"+time.replace(":",""); if(!existing.has(id)) list.push({ id, job, jobTitle:this.jobTitle(job), date:iso, time, length:len, booked:false, bookedBy:null, responseId:null, candidateId:null }); }
     }
-    if(!toCreate.length){ st.textContent = "Nothing new to create — those slots already exist."; return; }
-    st.textContent = `Creating ${toCreate.length} slots…`;
-    for(let i = 0; i < toCreate.length; i += 400){
-      const b = db.batch();
-      toCreate.slice(i,i+400).forEach(s => b.set(db.collection("slots").doc(s.id), { ...s, createdAt:TS() }));
-      await b.commit();
-    }
-    st.textContent = `Created ${toCreate.length} slots.`;
+    return { job, list, err:"" };
   },
-  async deleteSlot(id){ const s = this.slots.find(x => x.id === id); if(s && s.booked && !confirm(`This slot is booked by ${s.bookedBy}. Delete anyway? Their response stays.`)) return; await db.collection("slots").doc(id).delete(); },
-  async unbook(id){ if(!confirm("Free this slot up? The candidate's response is kept.")) return; await db.collection("slots").doc(id).update({ booked:false, bookedBy:null, responseId:null, bookedAt:null }); },
-  async deleteAllOpen(){ const open = this.slots.filter(s => !s.booked); if(!open.length) return; if(!confirm(`Delete all ${open.length} open slots? Booked ones are kept.`)) return; await this.batchDelete(open); },
-  async deleteOpenPast(){ const t = todayIso(); const old = this.slots.filter(s => !s.booked && s.date < t); if(!old.length){ $("slotSummary").textContent = "No past open slots."; return; } await this.batchDelete(old); },
-  async batchDelete(list){ for(let i = 0; i < list.length; i += 400){ const b = db.batch(); list.slice(i,i+400).forEach(s => b.delete(db.collection("slots").doc(s.id))); await b.commit(); } },
+  previewSlots(){ const p=this.slotPlan(); const st=$("gStatus"); if(p.err){ st.textContent=p.err; return; } st.textContent = p.list.length ? `This will create ${p.list.length} new slot${p.list.length===1?"":"s"}.` : "Nothing new \u2014 those slots already exist."; },
+  async generateSlots(){
+    const p=this.slotPlan(); const st=$("gStatus");
+    if(p.err){ st.textContent=p.err; return; } if(!p.list.length){ st.textContent="Nothing new to create."; return; }
+    const staff=[...$("gStaff").querySelectorAll("input:checked")].map(i=>i.value);
+    st.textContent=`Creating ${p.list.length} slots\u2026`;
+    for(let i=0;i<p.list.length;i+=400){ const b=db.batch(); p.list.slice(i,i+400).forEach(s => b.set(db.collection("slots").doc(s.id), { ...s, staff, createdAt:TS() })); await b.commit(); }
+    st.textContent=`Created ${p.list.length} slots`+(staff.length?` for ${staff.length} interviewer${staff.length===1?"":"s"}`:"")+".";
+  },
+  async setSlotStaff(id){
+    const s=this.slots.find(x=>x.id===id); const cur=(s.staff||[]);
+    const pick=prompt("Interviewer emails, comma-separated:\n"+this.staff.map(x=>x.email).join(", "), cur.join(", ")); if(pick===null) return;
+    const staff=pick.split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
+    await db.collection("slots").doc(id).update({ staff });
+    if(s.responseId){ try{ await db.collection("responses").doc(s.responseId).update({ staff }); }catch(e){} }
+  },
+  async deleteSlot(id){ const s=this.slots.find(x=>x.id===id); if(s&&s.booked&&!confirm(`This slot is booked by ${s.bookedBy}. Delete anyway? Their response stays.`)) return; await db.collection("slots").doc(id).delete(); },
+  async unbook(id){ if(!confirm("Free this slot up? The candidate's response is kept.")) return; await db.collection("slots").doc(id).update({ booked:false, bookedBy:null, responseId:null, candidateId:null, bookedAt:null }); },
+  async batchDelete(list){ for(let i=0;i<list.length;i+=400){ const b=db.batch(); list.slice(i,i+400).forEach(s=>b.delete(db.collection("slots").doc(s.id))); await b.commit(); } },
+  async deleteAllOpen(){ const jf=$("slotFilterJob").value; const open=this.slots.filter(s=>!s.booked&&(!jf||s.job===jf)); if(!open.length) return; if(!confirm(`Delete ${open.length} open slot(s)${jf?" for this posting":""}? Booked ones are kept.`)) return; await this.batchDelete(open); },
+  async deleteOpenPast(){ const t=todayIso(); const old=this.slots.filter(s=>!s.booked&&s.date<t); if(!old.length){ $("slotSummary").textContent="No past open slots."; return; } await this.batchDelete(old); },
   renderSlots(){
-    const open = this.slots.filter(s => !s.booked).length, booked = this.slots.length - open;
-    $("slotSummary").textContent = `${this.slots.length} slots · ${open} open · ${booked} booked`;
-    if(!this.slots.length){ $("slotAdmin").innerHTML = `<p class="muted">No slots yet. Use the form above to create a block.</p>`; return; }
-    const byDate = {}; this.slots.forEach(s => (byDate[s.date] = byDate[s.date] || []).push(s));
-    const today = todayIso();
-    $("slotAdmin").innerHTML = Object.keys(byDate).sort().map(d => `
-      <details ${d >= today ? "open" : ""} class="resp"><summary><strong>${dateLabel(d)}</strong><span class="muted">${byDate[d].filter(s=>s.booked).length} of ${byDate[d].length} booked</span></summary>
-      <div class="body"><table><thead><tr><th>Time</th><th>Status</th><th>Candidate</th><th></th></tr></thead><tbody>${byDate[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s => `
-        <tr><td>${ampm(s.time)}</td><td>${s.booked?'<span class="pill booked">Booked</span>':'<span class="pill open">Open</span>'}</td>
-        <td>${s.booked?esc(s.bookedBy):'<span class="muted">—</span>'}</td>
-        <td style="text-align:right">${s.booked?`<button class="quiet small" onclick="A.unbook('${s.id}')">Free up</button> `:''}<button class="danger small" onclick="A.deleteSlot('${s.id}')">Delete</button></td></tr>`).join("")}</tbody></table></div></details>`).join("");
+    const jf=$("slotFilterJob").value; const list=this.slots.filter(s=>!jf||s.job===jf);
+    const open=list.filter(s=>!s.booked).length; $("nSlots").textContent=this.slots.length;
+    $("slotSummary").textContent=`${list.length} slots \u00b7 ${open} open \u00b7 ${list.length-open} booked`;
+    if(!list.length){ $("slotAdmin").innerHTML=`<p class="muted">No slots yet. Use the form above.</p>`; return; }
+    const by={}; list.forEach(s=>(by[s.date]=by[s.date]||[]).push(s)); const t=todayIso();
+    $("slotAdmin").innerHTML=Object.keys(by).sort().map(d=>`<details ${d>=t?"open":""} class="resp"><summary><strong>${dateLabel(d)}</strong><span class="muted">${by[d].filter(s=>s.booked).length} of ${by[d].length} booked</span></summary>
+      <div class="body"><table><thead><tr><th>Time</th><th>Posting</th><th>Interviewers</th><th>Status</th><th>Candidate</th><th></th></tr></thead><tbody>${by[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s=>`
+        <tr><td>${ampm(s.time)}</td><td><span class="pill grey">${esc(this.jobTitle(s.job))}</span></td><td>${(s.staff||[]).map(esc).join(", ")||'<span class="muted">\u2014</span>'} <button class="quiet small" onclick="A.setSlotStaff('${s.id}')">Edit</button></td>
+        <td>${s.booked?'<span class="pill booked">Booked</span>':'<span class="pill open">Open</span>'}</td><td>${s.booked?esc(s.bookedBy):'<span class="muted">\u2014</span>'}</td>
+        <td style="text-align:right;white-space:nowrap">${s.booked?`<button class="quiet small" onclick="A.unbook('${s.id}')">Free up</button> `:''}<button class="danger small" onclick="A.deleteSlot('${s.id}')">Delete</button></td></tr>`).join("")}</tbody></table></div></details>`).join("");
   },
 
-  /* ----- responses ----- */
-  renderResponses(){
-    const f = $("respJobFilter").value;
-    const list = this.responses.filter(r => !f || r.job === f);
-    $("respCount").textContent = `${list.length} response${list.length===1?"":"s"}`;
-    if(!list.length){ $("respList").innerHTML = `<p class="muted">No responses yet. Share the candidate link and they'll show up here as they book.</p>`; return; }
-    $("respList").innerHTML = list.map(r => {
-      const when = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString() : "";
-      const ans = Object.values(r.answers||{}).map(a => `<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):esc(a.answer)||'<span class="muted">(blank)</span>'}</div></div>`).join("") || `<p class="muted">No questions were asked.</p>`;
-      return `<details class="resp"><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="muted">${esc(r.job||"")}</span><span class="pill booked">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}</span><span class="muted" style="margin-left:auto">${esc(when)}</span></summary>
+  /* ----- interviews (booked responses) ----- */
+  interviewList(){
+    const who=$("intWho").value, jf=$("intJob").value, me=(this.me&&this.me.email||"").toLowerCase();
+    return this.responses.filter(r => (!jf||r.job===jf) && (who==="all" || (r.staff||[]).map(x=>x.toLowerCase()).includes(me)))
+      .sort((a,b)=>(a.slotDate+a.slotTime).localeCompare(b.slotDate+b.slotTime));
+  },
+  candFor(r){ return this.candidates.find(c=>c.id===r.candidateId); },
+  renderInterviews(){
+    $("nInt").textContent=this.responses.length;
+    const list=this.interviewList(); const who=$("intWho").value;
+    $("intCount").textContent=`${list.length} interview${list.length===1?"":"s"}`;
+    if(!list.length){ $("intList").innerHTML=`<p class="muted">${who==="mine"?"No interviews assigned to you yet. Switch to \u201cAll interviews\u201d to see everyone's, or assign yourself when creating slots.":"No bookings yet. Share the candidate link and they'll appear here."}</p>`; return; }
+    const t=todayIso();
+    $("intList").innerHTML=list.map(r=>{
+      const c=this.candFor(r); const past=r.slotDate<t;
+      const ans=Object.values(r.answers||{}).map(a=>`<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||'<span class="muted">(blank)</span>')}</div></div>`).join("")||`<p class="muted">No questions were asked.</p>`;
+      return `<details class="resp" ${past?'':''}><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="pill booked">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}</span><span class="pill grey">${esc(this.jobTitle(r.job))}</span><span class="muted">${(r.staff||[]).map(esc).join(", ")||"no interviewer assigned"}</span></summary>
         <div class="body"><p class="muted" style="margin:10px 0 0">${esc(r.phone||"")}</p>${ans}
-        <div class="row" style="margin-top:8px"><button class="danger small" onclick="A.deleteResponse('${r.id}','${r.slotId||""}')">Delete response</button></div></div></details>`;
+        <div class="row" style="margin-top:12px"><button class="small" onclick="A.printResponse('${r.id}')">Print answers${c&&c.resumeUrl?" + resume":""}</button>${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Open resume</a>`:`<span class="muted">No resume attached</span>`}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Add to calendar</button><button class="danger small" onclick="A.deleteResponse('${r.id}')">Delete</button></div></div></details>`;
     }).join("");
   },
-  async deleteResponse(id, slotId){
-    if(!confirm("Delete this response? Their time slot will be freed up.")) return;
-    const r = this.responses.find(x => x.id === id);
-    const b = db.batch(); b.delete(db.collection("responses").doc(id));
-    if(slotId) b.update(db.collection("slots").doc(slotId), { booked:false, bookedBy:null, responseId:null, candidateId:null, bookedAt:null });
-    if(r && r.candidateId) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, usedAt:null });
+  async deleteResponse(id){
+    const r=this.responses.find(x=>x.id===id); if(!confirm("Delete this booking? The slot is freed and the candidate can book again.")) return;
+    const b=db.batch(); b.delete(db.collection("responses").doc(id));
+    if(r.slotId) b.update(db.collection("slots").doc(r.slotId), { booked:false, bookedBy:null, responseId:null, candidateId:null, bookedAt:null });
+    if(r.candidateId) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, usedAt:null });
     try{ await b.commit(); }catch(e){ await db.collection("responses").doc(id).delete(); }
   },
+  exportIcs(onlyId){
+    const list = onlyId ? this.responses.filter(r=>r.id===onlyId) : this.interviewList();
+    if(!list.length) return;
+    const events=list.map(r=>{ const c=this.candFor(r); const qa=Object.values(r.answers||{}).map(a=>a.question+"\n"+(Array.isArray(a.answer)?a.answer.join(", "):a.answer)).join("\n\n");
+      return { uid:"int-"+r.id, date:r.slotDate, time:r.slotTime, len:r.slotLength||30, summary:`Interview: ${r.firstName} ${r.lastName} \u2014 ${this.jobTitle(r.job)}`, location:"Phone: "+(r.phone||""),
+        description:[`Candidate: ${r.firstName} ${r.lastName}`,`Phone: ${r.phone||""}`,`Posting: ${this.jobTitle(r.job)}`,`Interviewers: ${(r.staff||[]).join(", ")||"unassigned"}`,c&&c.resumeUrl?`Resume: ${c.resumeUrl}`:"",qa?"\nAnswers:\n"+qa:""].filter(Boolean).join("\n") }; });
+    const name = onlyId ? `interview-${list[0].lastName}-${list[0].slotDate}.ics` : `interviews-${$("intWho").value}-${todayIso()}.ics`;
+    download(name, buildIcs(events), "text/calendar");
+  },
   exportCsv(){
-    const qs = [...new Set(this.responses.flatMap(r => Object.values(r.answers||{}).map(a => a.question)))];
-    const cols = ["First name","Last name","Phone","Job","Interview date","Interview time","Submitted",...qs];
-    const q = v => { const s = String(v ?? ""); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
-    const rows = [cols.map(q).join(",")];
-    this.responses.forEach(r => {
-      const byQ = {}; Object.values(r.answers||{}).forEach(a => byQ[a.question] = Array.isArray(a.answer)?a.answer.join("; "):a.answer);
-      rows.push([r.firstName,r.lastName,r.phone,r.job,r.slotDate,r.slotTime?ampm(r.slotTime):"",r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toISOString():"",...qs.map(k => byQ[k]||"")].map(q).join(","));
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"})); a.download = "interview-responses-"+todayIso()+".csv"; a.click();
+    const list=this.interviewList(); const qs=[...new Set(list.flatMap(r=>Object.values(r.answers||{}).map(a=>a.question)))];
+    const cols=["First name","Last name","Phone","Posting","Interview date","Interview time","Interviewers","Resume","Submitted",...qs];
+    const q=v=>{ const s=String(v??""); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+    const rows=[cols.map(q).join(",")];
+    list.forEach(r=>{ const c=this.candFor(r); const byQ={}; Object.values(r.answers||{}).forEach(a=>byQ[a.question]=Array.isArray(a.answer)?a.answer.join("; "):a.answer);
+      rows.push([r.firstName,r.lastName,r.phone,this.jobTitle(r.job),r.slotDate,r.slotTime?ampm(r.slotTime):"",(r.staff||[]).join("; "),c&&c.resumeUrl||"",r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toISOString():"",...qs.map(k=>byQ[k]||"")].map(q).join(",")); });
+    download("interviews-"+todayIso()+".csv", "\uFEFF"+rows.join("\r\n"), "text/csv;charset=utf-8");
+  },
+  printResponse(id){
+    const r=this.responses.find(x=>x.id===id); if(!r) return; const c=this.candFor(r);
+    const ans=Object.values(r.answers||{}).map(a=>`<div class="a"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div></div>`).join("")||"<p><em>No questions were asked.</em></p>";
+    const resume = c&&c.resumeUrl ? `<div class="pb"></div><h2>Resume \u2014 ${esc(c.resumeName||"")}</h2><p class="m">If the resume doesn't print below, open it separately: <a href="${esc(c.resumeUrl)}">${esc(c.resumeUrl)}</a></p><iframe src="${esc(c.resumeUrl)}"></iframe>` : `<p class="m">No resume attached.</p>`;
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(r.firstName)} ${esc(r.lastName)} \u2014 Interview</title><style>
+      body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1c1f1d;margin:40px;font-size:15px;line-height:1.5}
+      h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 10px;color:#1f5e4a}.m{color:#6b7280;margin:0 0 6px}
+      .box{border:1px solid #dfdcd4;border-radius:8px;padding:12px 16px;margin:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+      .a{margin:14px 0}.k{color:#6b7280;font-size:13px}.v{white-space:pre-wrap;margin-top:2px}
+      .pb{page-break-before:always}iframe{width:100%;height:95vh;border:1px solid #dfdcd4}
+      @media print{.noprint{display:none}body{margin:16mm}}</style></head><body>
+      <p class="noprint"><button onclick="window.print()">Print</button></p>
+      <p class="m">Dossani Paradise \u2014 Interview packet</p><h1>${esc(r.firstName)} ${esc(r.lastName)}</h1><p class="m">${esc(this.jobTitle(r.job))}</p>
+      <div class="box"><div><strong>Interview</strong><br>${r.slotDate?dateLabel(r.slotDate)+" at "+ampm(r.slotTime)+" Central":"\u2014"}</div><div><strong>Phone</strong><br>${esc(r.phone||"")}</div>
+      <div><strong>Interviewers</strong><br>${(r.staff||[]).map(esc).join(", ")||"\u2014"}</div><div><strong>Submitted</strong><br>${r.createdAt&&r.createdAt.toDate?esc(r.createdAt.toDate().toLocaleString()):""}</div></div>
+      <h2>Screening answers</h2>${ans}<h2>Interview notes</h2><div style="border:1px solid #dfdcd4;height:180px;border-radius:8px"></div>${resume}
+      <script>window.addEventListener("load",()=>setTimeout(()=>window.print(),400));<\/script></body></html>`;
+    const w=window.open("","_blank"); if(!w){ alert("Allow pop-ups to print."); return; } w.document.write(html); w.document.close();
+  },
+
+  /* ----- questions ----- */
+  qTypeChanged(){ const t=$("qType").value; $("qOptsWrap").style.display=t==="text"?"none":"block"; if(t!=="text"&&!$("qOpts").children.length){ this.addOpt(); this.addOpt(); } },
+  addOpt(v=""){ const d=document.createElement("div"); d.className="opt-row"; d.innerHTML=`<input value="${esc(v)}" placeholder="Choice"><button class="quiet small" onclick="this.parentNode.remove()">\u2715</button>`; $("qOpts").appendChild(d); },
+  readOpts(){ return [...$("qOpts").querySelectorAll("input")].map(i=>i.value.trim()).filter(Boolean); },
+  async saveQuestions(list){ await db.doc("config/questions").set({ list, updatedAt:TS() }); },
+  async saveQuestion(){
+    const text=$("qText").value.trim(), type=$("qType").value, job=$("qJob").value, required=$("qReq").value==="1";
+    if(!text){ $("qStatus").textContent="Enter the question text."; return; }
+    const options=type==="text"?[]:this.readOpts(); if(type!=="text"&&options.length<2){ $("qStatus").textContent="Add at least two choices."; return; }
+    const list=this.questions.slice();
+    if(this.editingId){ const i=list.findIndex(q=>q.id===this.editingId); list[i]={...list[i],text,type,job,required,options}; } else list.push({ id:"q"+Date.now().toString(36), text, type, job, required, options });
+    await this.saveQuestions(list); this.cancelEdit(); $("qStatus").textContent="Saved.";
+  },
+  editQuestion(id){ const q=this.questions.find(x=>x.id===id); if(!q) return; this.editingId=id; $("qFormTitle").textContent="Edit question"; $("qSaveBtn").textContent="Save changes"; $("qCancelBtn").style.display=""; $("qText").value=q.text; $("qType").value=q.type; $("qJob").value=q.job||""; $("qReq").value=q.required?"1":"0"; $("qOpts").innerHTML=""; (q.options||[]).forEach(o=>this.addOpt(o)); this.qTypeChanged(); window.scrollTo({top:0}); },
+  cancelEdit(){ this.editingId=null; $("qFormTitle").textContent="Add a question"; $("qSaveBtn").textContent="Add question"; $("qCancelBtn").style.display="none"; $("qText").value=""; $("qType").value="text"; $("qJob").value=""; $("qReq").value="1"; $("qOpts").innerHTML=""; this.qTypeChanged(); },
+  async removeQuestion(id){ if(!confirm("Delete this question?")) return; await this.saveQuestions(this.questions.filter(q=>q.id!==id)); },
+  async moveQuestion(i,d){ const l=this.questions.slice(); const [x]=l.splice(i,1); l.splice(i+d,0,x); await this.saveQuestions(l); },
+  renderQuestions(){
+    const tn={text:"Free response",mc:"Multiple choice",multi:"Checkboxes"};
+    $("qAdmin").innerHTML=this.questions.length?this.questions.map((q,i)=>`<div class="list-item" style="align-items:flex-start"><div class="grow"><div>${esc(q.text)}${q.required?' <span class="req">*</span>':''}</div><div class="muted">${tn[q.type]||q.type} \u00b7 ${q.job?esc(this.jobTitle(q.job)):"All postings"}${q.options&&q.options.length?" \u00b7 "+q.options.map(esc).join(" / "):""}</div></div>
+      <button class="quiet small" onclick="A.moveQuestion(${i},-1)" ${i===0?'disabled':''}>\u2191</button><button class="quiet small" onclick="A.moveQuestion(${i},1)" ${i===this.questions.length-1?'disabled':''}>\u2193</button><button class="quiet small" onclick="A.editQuestion('${q.id}')">Edit</button><button class="danger small" onclick="A.removeQuestion('${q.id}')">Delete</button></div>`).join("")
+      :`<p class="muted">No questions yet. Candidates will go straight to picking a time.</p>`;
   }
 };
 
-/* ---------- routing: #/admin -> admin, anything else -> candidate ---------- */
-(function route(){
-  if(location.hash.replace(/^#\/?/,"").startsWith("admin")) A.init(); else C.init();
-})();
+(function route(){ if(location.hash.replace(/^#\/?/,"").startsWith("admin")) A.init(); else C.init(); })();
 window.addEventListener("hashchange", () => location.reload());
 </script>
 </body>
