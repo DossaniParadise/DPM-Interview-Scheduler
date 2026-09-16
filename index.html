@@ -192,7 +192,7 @@
     <div class="panel" id="p-candidates">
       <div class="card" style="margin-bottom:22px" id="candForm">
         <h2>Approved candidates</h2>
-        <p class="muted" style="margin:0 0 14px">Only people on this list can book, and each can book once. Paste one per line as <em>First Last, phone</em> — commas or tabs both work. Resumes can be attached after adding.</p>
+        <p class="muted" style="margin:0 0 14px">Only people on this list can book, and each can book once. Paste one per line as <em>First Last, phone</em> — commas or tabs both work. Resumes are attached after adding — they upload to Filestack, same as PayMi.</p>
         <div class="field"><label class="f">Posting they applied to</label><select id="candJob"></select></div>
         <textarea id="candPaste" placeholder="Ka'Bren Mitchell, (972) 827-6352&#10;Mustafa Haq, 917-680-2064" style="min-height:120px;font-size:15px"></textarea>
         <div class="row" style="margin-top:10px"><button onclick="A.importCandidates()">Add to list</button><span class="status" id="cStatus"></span></div>
@@ -279,7 +279,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://static.filestackapi.com/filestack-js/3.x.x/filestack.min.js"></script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyAGVKL7XcAcFfCSD0JShD_v2oP4nXaxUnw",
@@ -289,7 +289,15 @@ firebase.initializeApp({
   messagingSenderId: "665696820475",
   appId: "1:665696820475:web:0efb712a2971b6c6cde45e"
 });
-const db = firebase.firestore(), auth = firebase.auth(), storage = firebase.storage();
+const db = firebase.firestore(), auth = firebase.auth();
+// Filestack — same key as PayMi. Public by design; lock it to your domains in the Filestack dashboard.
+const FILESTACK_KEY = "Afe1LdETdKFIBOgrA4TgLz";
+let fsClient = null;
+function getFilestack(){
+  if(fsClient) return fsClient;
+  if(window.filestack && FILESTACK_KEY){ try{ fsClient = window.filestack.init(FILESTACK_KEY); }catch(e){ console.warn(e); } }
+  return fsClient;
+}
 const TS = () => firebase.firestore.FieldValue.serverTimestamp();
 
 /* ---------- helpers ---------- */
@@ -563,30 +571,40 @@ const A = {
       out.slice(i,i+400).forEach(c => {
         const id=candToken(c.firstName,c.lastName,c.last4);
         if(existing.has(id)){ skipped++; return; } existing.add(id); added++;
-        b.set(db.collection("candidates").doc(id), { firstName:c.firstName, lastName:c.lastName, phone:c.phone, last4:c.last4, nameKey:nameKey(c.firstName,c.lastName), job, jobTitle:this.jobTitle(job), used:false, responseId:null, resumePath:null, resumeUrl:null, resumeName:null, createdAt:TS() });
+        b.set(db.collection("candidates").doc(id), { firstName:c.firstName, lastName:c.lastName, phone:c.phone, last4:c.last4, nameKey:nameKey(c.firstName,c.lastName), job, jobTitle:this.jobTitle(job), used:false, responseId:null, resumeUrl:null, resumeName:null, resumeHandle:null, createdAt:TS() });
       });
       await b.commit();
     }
     $("candPaste").value="";
     st.textContent = `Added ${added}`+(skipped?`, skipped ${skipped} already on the list`:"")+(bad.length?`. Couldn't read ${bad.length}: ${bad.slice(0,3).join(" | ")}`:".");
   },
-  async uploadResume(id, input){
-    const file = input.files && input.files[0]; if(!file) return;
-    if(file.size > 10*1024*1024){ alert("Resume must be under 10 MB."); return; }
-    const c=this.candidates.find(x=>x.id===id); const path=`resumes/${id}/${file.name}`;
-    const row=$("cres_"+id); if(row) row.textContent="Uploading\u2026";
-    try{
-      if(c && c.resumePath && c.resumePath!==path){ try{ await storage.ref(c.resumePath).delete(); }catch(e){} }
-      const snap = await storage.ref(path).put(file); const url = await snap.ref.getDownloadURL();
-      await db.collection("candidates").doc(id).update({ resumePath:path, resumeUrl:url, resumeName:file.name });
-    }catch(e){ alert("Upload failed: "+e.message); if(row) row.textContent="Upload failed"; }
+  uploadResume(id){
+    const c=this.candidates.find(x=>x.id===id); if(!c) return;
+    const fs=getFilestack();
+    if(!fs){ alert("Upload isn't available \u2014 the Filestack script didn't load. Check the network or the API key."); return; }
+    const row=$("cres_"+id);
+    const folder = "/resumes/"+(this.jobTitle(c.job)||"unfiled").replace(/[^A-Za-z0-9]+/g,"_")+"/";
+    fs.picker({
+      accept:["application/pdf",".doc",".docx","image/*"],
+      maxFiles:1, maxSize:10*1024*1024,
+      fromSources:["local_file_system","googledrive","dropbox","onedrive"],
+      storeTo:{ path:folder },
+      onUploadDone: async r => {
+        const f=r.filesUploaded && r.filesUploaded[0];
+        if(!f){ if(row) row.textContent="Nothing was uploaded."; return; }
+        if(row) row.textContent="Saving\u2026";
+        try{ await db.collection("candidates").doc(id).update({ resumeUrl:f.url, resumeName:f.filename, resumeHandle:f.handle, resumeSize:f.size||null, resumePath:null }); }
+        catch(e){ alert("Saved to Filestack but couldn't attach to the candidate: "+e.message); }
+      },
+      onFileUploadFailed:(f,e)=>{ alert("Upload failed: "+((e&&e.message)||"unknown error")); },
+    }).open();
   },
   async removeResume(id){
-    const c=this.candidates.find(x=>x.id===id); if(!c||!c.resumePath) return; if(!confirm("Remove this resume?")) return;
-    try{ await storage.ref(c.resumePath).delete(); }catch(e){}
-    await db.collection("candidates").doc(id).update({ resumePath:null, resumeUrl:null, resumeName:null });
+    const c=this.candidates.find(x=>x.id===id); if(!c||!c.resumeUrl) return;
+    if(!confirm("Detach this resume? The file stays in Filestack; only the link is removed.")) return;
+    await db.collection("candidates").doc(id).update({ resumeUrl:null, resumeName:null, resumeHandle:null, resumeSize:null });
   },
-  async removeCandidate(id){ const c=this.candidates.find(x=>x.id===id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; if(c.resumePath){ try{ await storage.ref(c.resumePath).delete(); }catch(e){} } await db.collection("candidates").doc(id).delete(); },
+  async removeCandidate(id){ const c=this.candidates.find(x=>x.id===id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; await db.collection("candidates").doc(id).delete(); },
   async resetCandidate(id){ if(!confirm("Let this person book again? Their earlier response is kept.")) return; await db.collection("candidates").doc(id).update({ used:false, responseId:null, usedAt:null }); },
   renderCandidates(){
     const q=($("candSearch").value||"").toLowerCase(), jf=$("candFilterJob").value;
@@ -597,7 +615,7 @@ const A = {
     if(!list.length){ $("candAdmin").innerHTML=`<p class="muted">No matches.</p>`; return; }
     $("candAdmin").innerHTML=`<table><thead><tr><th>Name</th><th>Phone</th><th>Posting</th><th>Resume</th><th>Status</th><th></th></tr></thead><tbody>${list.map(c=>`
       <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td><td><span class="pill grey">${esc(this.jobTitle(c.job))}</span></td>
-      <td id="cres_${c.id}">${c.resumeUrl?`<a href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">${esc(c.resumeName||"Open")}</a> <button class="quiet small" onclick="A.removeResume('${c.id}')">\u2715</button>`:`<span class="file-btn"><button class="quiet small">Attach</button><input type="file" accept=".pdf,.doc,.docx" onchange="A.uploadResume('${c.id}',this)"></span>`}</td>
+      <td id="cres_${c.id}">${c.resumeUrl?`<a href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">${esc(c.resumeName||"Open")}</a> <button class="quiet small" onclick="A.removeResume('${c.id}')">\u2715</button>`:`<button class="quiet small" onclick="A.uploadResume('${c.id}')">Attach</button>`}</td>
       <td>${c.used?'<span class="pill booked">Booked</span>':'<span class="pill open">Not yet</span>'}</td>
       <td style="text-align:right;white-space:nowrap">${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
   },
