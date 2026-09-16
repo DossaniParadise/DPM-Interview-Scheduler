@@ -129,7 +129,6 @@
       <div class="field"><label class="f" for="ln">Last name</label><input id="ln" autocomplete="family-name"></div>
     </div>
     <div class="field"><label class="f" for="p4">Last 4 digits of the phone number on your application</label><input id="p4" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" style="max-width:160px;letter-spacing:.2em;font-size:22px"></div>
-    <div class="field"><label class="f" for="em">Email (so we can confirm your time)</label><input id="em" type="email" autocomplete="email"></div>
     <div class="err" id="e1"></div>
     <div class="nav"><span></span><button id="verifyBtn" onclick="C.next(1)">Continue</button></div>
   </section>
@@ -164,13 +163,15 @@
   <!-- Step 5: done -->
   <section id="s5" class="card" style="display:none">
     <h1>You're booked.</h1>
-    <p class="lead">We'll be in touch at the email you gave us. Here's your time:</p>
+    <p class="lead">We'll call you at the number on your application. Here's your time:</p>
     <div class="confirm-box"><strong id="doneSlot"></strong><span id="doneWho"></span></div>
     <div class="row">
       <button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button>
     </div>
     <p class="muted" style="margin-top:18px">Need to change it? Contact us and we'll move it — this link only works once.</p>
   </section>
+
+  <p class="muted" style="text-align:center;margin-top:40px;font-size:13px"><a href="#/admin" style="color:var(--ink-3)">Staff sign-in</a></p>
 
   <!-- closed state -->
   <section id="s0" class="card" style="display:none">
@@ -354,7 +355,7 @@ const candToken = (f,l,p4) => sha256(nameKey(f,l)+"|"+p4);
    ============================================================ */
 const C = {
   step: 1, jobs: [], questions: [], slots: [], unsub: null,
-  data: { firstName:"", lastName:"", email:"", phone:"", job:"", answers:{}, slotId:"", candidateId:"" },
+  data: { firstName:"", lastName:"", phone:"", job:"", answers:{}, slotId:"", candidateId:"" },
   booked: null, fails: 0, lockedUntil: 0,
 
   async init(){
@@ -407,12 +408,11 @@ const C = {
   },
 
   async verify(){
-    const fn = $("fn").value.trim(), ln = $("ln").value.trim(), em = $("em").value.trim(), p4 = $("p4").value.trim();
+    const fn = $("fn").value.trim(), ln = $("ln").value.trim(), p4 = $("p4").value.trim();
     const e = $("e1"), btn = $("verifyBtn");
     if(Date.now() < this.lockedUntil){ e.textContent = "Too many attempts. Please wait a minute and try again."; return; }
     if(!fn || !ln){ e.textContent = "Please enter your first and last name."; return; }
     if(!/^\d{4}$/.test(p4)){ e.textContent = "Enter the last 4 digits of your phone number."; return; }
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ e.textContent = "Please enter a valid email so we can confirm your time."; return; }
     e.textContent = ""; btn.disabled = true; btn.textContent = "Checking\u2026";
     const id = candToken(fn, ln, p4);
     try{
@@ -425,7 +425,7 @@ const C = {
       }
       const c = d.data();
       if(c.used){ e.textContent = "You've already booked a time. If you need to change it, contact us and we'll move it."; return; }
-      Object.assign(this.data, { firstName:c.firstName || fn, lastName:c.lastName || ln, email:em, phone:c.phone || "", candidateId:id });
+      Object.assign(this.data, { firstName:c.firstName || fn, lastName:c.lastName || ln, phone:c.phone || "", candidateId:id });
       if(!this.jobs.length){ this.data.job = ""; this.show(3); return; }
       this.show(2);
     }catch(err){ console.error(err); e.textContent = "Couldn't check your details right now. Please try again in a moment."; }
@@ -488,7 +488,7 @@ const C = {
         slotData = s.data();
         tx.set(respRef, {
           candidateId:this.data.candidateId,
-          firstName:this.data.firstName, lastName:this.data.lastName, email:this.data.email, phone:this.data.phone,
+          firstName:this.data.firstName, lastName:this.data.lastName, phone:this.data.phone,
           job:this.data.job, answers:this.data.answers, slotId:this.data.slotId,
           slotDate:slotData.date, slotTime:slotData.time, createdAt:TS()
         });
@@ -731,7 +731,7 @@ const A = {
       const when = r.createdAt && r.createdAt.toDate ? r.createdAt.toDate().toLocaleString() : "";
       const ans = Object.values(r.answers||{}).map(a => `<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):esc(a.answer)||'<span class="muted">(blank)</span>'}</div></div>`).join("") || `<p class="muted">No questions were asked.</p>`;
       return `<details class="resp"><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="muted">${esc(r.job||"")}</span><span class="pill booked">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}</span><span class="muted" style="margin-left:auto">${esc(when)}</span></summary>
-        <div class="body"><p class="muted" style="margin:10px 0 0">${esc(r.email||"")}${r.phone?" · "+esc(r.phone):""}</p>${ans}
+        <div class="body"><p class="muted" style="margin:10px 0 0">${esc(r.phone||"")}</p>${ans}
         <div class="row" style="margin-top:8px"><button class="danger small" onclick="A.deleteResponse('${r.id}','${r.slotId||""}')">Delete response</button></div></div></details>`;
     }).join("");
   },
@@ -745,12 +745,12 @@ const A = {
   },
   exportCsv(){
     const qs = [...new Set(this.responses.flatMap(r => Object.values(r.answers||{}).map(a => a.question)))];
-    const cols = ["First name","Last name","Email","Phone","Job","Interview date","Interview time","Submitted",...qs];
+    const cols = ["First name","Last name","Phone","Job","Interview date","Interview time","Submitted",...qs];
     const q = v => { const s = String(v ?? ""); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
     const rows = [cols.map(q).join(",")];
     this.responses.forEach(r => {
       const byQ = {}; Object.values(r.answers||{}).forEach(a => byQ[a.question] = Array.isArray(a.answer)?a.answer.join("; "):a.answer);
-      rows.push([r.firstName,r.lastName,r.email,r.phone,r.job,r.slotDate,r.slotTime?ampm(r.slotTime):"",r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toISOString():"",...qs.map(k => byQ[k]||"")].map(q).join(","));
+      rows.push([r.firstName,r.lastName,r.phone,r.job,r.slotDate,r.slotTime?ampm(r.slotTime):"",r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toISOString():"",...qs.map(k => byQ[k]||"")].map(q).join(","));
     });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"})); a.download = "interview-responses-"+todayIso()+".csv"; a.click();
