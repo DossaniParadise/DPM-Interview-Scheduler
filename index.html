@@ -123,15 +123,15 @@
   <!-- Step 1: name -->
   <section id="s1" class="card" style="display:none">
     <h1>Let's get you scheduled.</h1>
-    <p class="lead">This takes about five minutes. You'll answer a few short questions, then pick a time to talk with us.</p>
+    <p class="lead">Enter your name as it appears on your application. This takes about five minutes: a few short questions, then you pick a time to talk with us.</p>
     <div class="name-grid">
       <div class="field"><label class="f" for="fn">First name</label><input id="fn" autocomplete="given-name"></div>
       <div class="field"><label class="f" for="ln">Last name</label><input id="ln" autocomplete="family-name"></div>
     </div>
+    <div class="field"><label class="f" for="p4">Last 4 digits of the phone number on your application</label><input id="p4" inputmode="numeric" maxlength="4" pattern="[0-9]*" autocomplete="off" style="max-width:160px;letter-spacing:.2em;font-size:22px"></div>
     <div class="field"><label class="f" for="em">Email (so we can confirm your time)</label><input id="em" type="email" autocomplete="email"></div>
-    <div class="field"><label class="f" for="ph">Phone</label><input id="ph" type="tel" autocomplete="tel"></div>
     <div class="err" id="e1"></div>
-    <div class="nav"><span></span><button onclick="C.next(1)">Continue</button></div>
+    <div class="nav"><span></span><button id="verifyBtn" onclick="C.next(1)">Continue</button></div>
   </section>
 
   <!-- Step 2: job -->
@@ -169,7 +169,7 @@
     <div class="row">
       <button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button>
     </div>
-    <p class="muted" style="margin-top:18px">Need to change it? Reply to the confirmation email or contact us and we'll move it.</p>
+    <p class="muted" style="margin-top:18px">Need to change it? Contact us and we'll move it — this link only works once.</p>
   </section>
 
   <!-- closed state -->
@@ -201,6 +201,7 @@
       <button data-t="slots" onclick="A.tab('slots')">Time slots</button>
       <button data-t="questions" onclick="A.tab('questions')">Questions</button>
       <button data-t="jobs" onclick="A.tab('jobs')">Job postings</button>
+      <button data-t="candidates" onclick="A.tab('candidates')">Approved candidates</button>
     </div>
 
     <!-- Responses -->
@@ -266,6 +267,21 @@
       <div id="qAdmin"></div>
     </div>
 
+    <!-- Candidates -->
+    <div class="panel" id="p-candidates">
+      <div class="card" style="margin-bottom:22px">
+        <h2 style="margin:0 0 4px;font-size:19px">Approved candidates</h2>
+        <p class="muted" style="margin:0 0 14px">Only people on this list can book. Each can book once. Paste one per line as <em>First Last, phone</em> — commas or tabs both work, so you can paste straight from a spreadsheet.</p>
+        <textarea id="candPaste" placeholder="Ka'Bren Mitchell, (972) 827-6352&#10;Mustafa Haq, 917-680-2064" style="min-height:130px;font-size:15px"></textarea>
+        <div class="row" style="margin-top:10px"><button onclick="A.importCandidates()">Add to list</button><span class="status" id="cStatus"></span></div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <span class="muted" id="candSummary"></span>
+        <input id="candSearch" placeholder="Search" oninput="A.renderCandidates()" style="width:220px;padding:8px 10px;font-size:15px">
+      </div>
+      <div id="candAdmin"><p class="muted">Loading…</p></div>
+    </div>
+
     <!-- Jobs -->
     <div class="panel" id="p-jobs">
       <div class="card" style="margin-bottom:22px">
@@ -312,13 +328,34 @@ const ampm = t => { const [h,m] = t.split(":").map(Number); const s = h<12?"am":
 const dateLabel = iso => { const [y,mo,d] = iso.split("-").map(Number); return new Date(y,mo-1,d).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}); };
 const shortDate = iso => { const [y,mo,d] = iso.split("-").map(Number); return new Date(y,mo-1,d).toLocaleDateString("en-US",{weekday:"short",month:"numeric",day:"numeric"}); };
 
+/* ---------- candidate identity ---------- */
+const nameKey = (f,l) => (f+" "+l).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const last4 = p => { const d = String(p||"").replace(/\D/g,""); return d.slice(-4); };
+// Compact SHA-256 so the token is identical on admin and candidate sides without needing crypto.subtle.
+function sha256(str){
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const b=new TextEncoder().encode(str), l=b.length, L=((l+9+63)>>6)<<6, m=new Uint8Array(L); m.set(b); m[l]=0x80;
+  const dv=new DataView(m.buffer); dv.setUint32(L-4,(l*8)>>>0); dv.setUint32(L-8,Math.floor(l*8/4294967296));
+  const r=(x,n)=>(x>>>n)|(x<<(32-n)), w=new Uint32Array(64);
+  for(let i=0;i<L;i+=64){
+    for(let t=0;t<16;t++) w[t]=dv.getUint32(i+t*4);
+    for(let t=16;t<64;t++){const s0=r(w[t-15],7)^r(w[t-15],18)^(w[t-15]>>>3), s1=r(w[t-2],17)^r(w[t-2],19)^(w[t-2]>>>10); w[t]=(w[t-16]+s0+w[t-7]+s1)>>>0;}
+    let [a,bb,c,d,e,f,g,h]=H;
+    for(let t=0;t<64;t++){const S1=r(e,6)^r(e,11)^r(e,25), ch=(e&f)^(~e&g), t1=(h+S1+ch+K[t]+w[t])>>>0, S0=r(a,2)^r(a,13)^r(a,22), mj=(a&bb)^(a&c)^(bb&c), t2=(S0+mj)>>>0; h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=bb;bb=a;a=(t1+t2)>>>0;}
+    H=[(H[0]+a)>>>0,(H[1]+bb)>>>0,(H[2]+c)>>>0,(H[3]+d)>>>0,(H[4]+e)>>>0,(H[5]+f)>>>0,(H[6]+g)>>>0,(H[7]+h)>>>0];
+  }
+  return H.map(x=>x.toString(16).padStart(8,"0")).join("");
+}
+const candToken = (f,l,p4) => sha256(nameKey(f,l)+"|"+p4);
+
 /* ============================================================
    CANDIDATE FLOW
    ============================================================ */
 const C = {
   step: 1, jobs: [], questions: [], slots: [], unsub: null,
-  data: { firstName:"", lastName:"", email:"", phone:"", job:"", answers:{}, slotId:"" },
-  booked: null,
+  data: { firstName:"", lastName:"", email:"", phone:"", job:"", answers:{}, slotId:"", candidateId:"" },
+  booked: null, fails: 0, lockedUntil: 0,
 
   async init(){
     $("candidateView").style.display = "block";
@@ -347,15 +384,7 @@ const C = {
   back(n){ this.show(n-1); },
 
   next(n){
-    if(n===1){
-      const fn = $("fn").value.trim(), ln = $("ln").value.trim(), em = $("em").value.trim(), ph = $("ph").value.trim();
-      if(!fn || !ln){ $("e1").textContent = "Please enter your first and last name."; return; }
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ $("e1").textContent = "Please enter a valid email so we can confirm your time."; return; }
-      $("e1").textContent = "";
-      Object.assign(this.data, { firstName:fn, lastName:ln, email:em, phone:ph });
-      if(!this.jobs.length){ this.data.job = ""; this.show(3); return; }
-      this.show(2);
-    }
+    if(n===1){ this.verify(); return; }
     if(n===2){
       const sel = document.querySelector('input[name="job"]:checked');
       if(!sel){ $("e2").textContent = "Pick the position you applied for."; return; }
@@ -375,6 +404,32 @@ const C = {
       }
       $("e3").textContent = ""; this.data.answers = answers; this.show(4);
     }
+  },
+
+  async verify(){
+    const fn = $("fn").value.trim(), ln = $("ln").value.trim(), em = $("em").value.trim(), p4 = $("p4").value.trim();
+    const e = $("e1"), btn = $("verifyBtn");
+    if(Date.now() < this.lockedUntil){ e.textContent = "Too many attempts. Please wait a minute and try again."; return; }
+    if(!fn || !ln){ e.textContent = "Please enter your first and last name."; return; }
+    if(!/^\d{4}$/.test(p4)){ e.textContent = "Enter the last 4 digits of your phone number."; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ e.textContent = "Please enter a valid email so we can confirm your time."; return; }
+    e.textContent = ""; btn.disabled = true; btn.textContent = "Checking\u2026";
+    const id = candToken(fn, ln, p4);
+    try{
+      const d = await db.collection("candidates").doc(id).get();
+      if(!d.exists){
+        this.fails++;
+        if(this.fails >= 5){ this.lockedUntil = Date.now() + 60000; this.fails = 0; e.textContent = "Too many attempts. Please wait a minute and try again."; }
+        else e.textContent = "We couldn't find that name and number together. Check the spelling matches your application, or contact the person who sent you this link.";
+        return;
+      }
+      const c = d.data();
+      if(c.used){ e.textContent = "You've already booked a time. If you need to change it, contact us and we'll move it."; return; }
+      Object.assign(this.data, { firstName:c.firstName || fn, lastName:c.lastName || ln, email:em, phone:c.phone || "", candidateId:id });
+      if(!this.jobs.length){ this.data.job = ""; this.show(3); return; }
+      this.show(2);
+    }catch(err){ console.error(err); e.textContent = "Couldn't check your details right now. Please try again in a moment."; }
+    finally{ btn.disabled = false; btn.textContent = "Continue"; }
   },
 
   renderJobs(){
@@ -420,21 +475,25 @@ const C = {
     if(!this.data.slotId){ $("e4").textContent = "Pick a time first."; return; }
     const btn = $("bookBtn"); btn.disabled = true; btn.textContent = "Booking…";
     const slotRef = db.collection("slots").doc(this.data.slotId);
+    const candRef = db.collection("candidates").doc(this.data.candidateId);
     const respRef = db.collection("responses").doc();
     const who = this.data.firstName + " " + this.data.lastName;
     try{
       let slotData;
       await db.runTransaction(async tx => {
-        const s = await tx.get(slotRef);
+        const [s, c] = await Promise.all([tx.get(slotRef), tx.get(candRef)]);
+        if(!c.exists || c.data().used) throw new Error("used");
         if(!s.exists) throw new Error("gone");
         if(s.data().booked) throw new Error("taken");
         slotData = s.data();
         tx.set(respRef, {
+          candidateId:this.data.candidateId,
           firstName:this.data.firstName, lastName:this.data.lastName, email:this.data.email, phone:this.data.phone,
           job:this.data.job, answers:this.data.answers, slotId:this.data.slotId,
           slotDate:slotData.date, slotTime:slotData.time, createdAt:TS()
         });
-        tx.update(slotRef, { booked:true, bookedBy:who, responseId:respRef.id, bookedAt:TS() });
+        tx.update(slotRef, { booked:true, bookedBy:who, responseId:respRef.id, candidateId:this.data.candidateId, bookedAt:TS() });
+        tx.update(candRef, { used:true, responseId:respRef.id, usedAt:TS() });
       });
       this.booked = { ...slotData, who };
       $("doneSlot").textContent = dateLabel(slotData.date) + " at " + ampm(slotData.time) + " Central";
@@ -442,7 +501,8 @@ const C = {
       this.show(5);
     }catch(e){
       btn.disabled = false; btn.textContent = "Book this time";
-      if(e.message === "taken"){ $("e4").textContent = "Sorry — someone just took that time. Please pick another."; this.data.slotId = ""; this.renderSlots(); }
+      if(e.message === "used"){ $("e4").textContent = "This link has already been used to book a time. Contact us if you need to change it."; }
+      else if(e.message === "taken"){ $("e4").textContent = "Sorry — someone just took that time. Please pick another."; this.data.slotId = ""; this.renderSlots(); }
       else if(e.message === "gone"){ $("e4").textContent = "That time is no longer available. Please pick another."; this.data.slotId = ""; this.renderSlots(); }
       else { $("e4").textContent = "Couldn't save your booking. Please try again."; console.error(e); }
     }
@@ -465,7 +525,7 @@ const C = {
    ADMIN
    ============================================================ */
 const A = {
-  jobs: [], questions: [], slots: [], responses: [], editingId: null, unsubs: [],
+  jobs: [], questions: [], slots: [], responses: [], candidates: [], editingId: null, unsubs: [],
 
   init(){
     $("adminView").style.display = "block";
@@ -492,10 +552,66 @@ const A = {
     this.unsubs.push(db.doc("config/jobs").onSnapshot(d => { this.jobs = (d.exists && d.data().list) || []; this.renderJobs(); this.fillJobSelects(); }));
     this.unsubs.push(db.doc("config/questions").onSnapshot(d => { this.questions = (d.exists && d.data().list) || []; this.renderQuestions(); }));
     this.unsubs.push(db.collection("slots").onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id, ...d.data()})); this.renderSlots(); }));
+    this.unsubs.push(db.collection("candidates").onSnapshot(s => { this.candidates = s.docs.map(d => ({id:d.id, ...d.data()})); this.renderCandidates(); },
+      e => { $("candAdmin").innerHTML = `<p class="err">Can't read candidates: ${esc(e.message)}</p>`; }));
     this.unsubs.push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id, ...d.data()})); this.renderResponses(); },
       e => { $("respList").innerHTML = `<p class="err">Can't read responses: ${esc(e.message)}</p>`; }));
   },
   unsubscribe(){ this.unsubs.forEach(u => u()); this.unsubs = []; },
+
+  /* ----- approved candidates ----- */
+  parseCandidates(text){
+    const out = [], bad = [];
+    text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).forEach(line => {
+      const parts = line.split(/\t|,/).map(x => x.trim()).filter(Boolean);
+      let name = "", phone = "";
+      // find the field that looks like a phone; everything else is name
+      const pi = parts.findIndex(x => x.replace(/\D/g,"").length >= 7);
+      if(pi >= 0){ phone = parts[pi]; name = parts.filter((_,i) => i !== pi).join(" "); }
+      else { // maybe "First Last 5551234567" with spaces
+        const m = line.match(/^(.*?)[\s,]+([\d\s().+-]{7,})$/); if(m){ name = m[1]; phone = m[2]; }
+      }
+      const words = name.replace(/\s+/g," ").trim().split(" ");
+      if(!phone || words.length < 2){ bad.push(line); return; }
+      const first = words.slice(0,-1).join(" "), last = words[words.length-1];
+      out.push({ firstName:first, lastName:last, phone:phone.trim(), last4:last4(phone) });
+    });
+    return { out, bad };
+  },
+  async importCandidates(){
+    const st = $("cStatus");
+    const { out, bad } = this.parseCandidates($("candPaste").value);
+    if(!out.length){ st.textContent = bad.length ? "Couldn't read any lines. Use: First Last, phone" : "Paste some names first."; return; }
+    const existing = new Set(this.candidates.map(c => c.id));
+    let added = 0, skipped = 0;
+    for(let i = 0; i < out.length; i += 400){
+      const b = db.batch();
+      out.slice(i,i+400).forEach(c => {
+        const id = candToken(c.firstName, c.lastName, c.last4);
+        if(existing.has(id)){ skipped++; return; }
+        existing.add(id); added++;
+        b.set(db.collection("candidates").doc(id), { firstName:c.firstName, lastName:c.lastName, phone:c.phone, last4:c.last4, nameKey:nameKey(c.firstName,c.lastName), used:false, responseId:null, createdAt:TS() });
+      });
+      await b.commit();
+    }
+    $("candPaste").value = "";
+    st.textContent = `Added ${added}` + (skipped ? `, skipped ${skipped} already on the list` : "") + (bad.length ? `. Couldn't read ${bad.length} line${bad.length===1?"":"s"}: ${bad.slice(0,3).join(" | ")}` : ".");
+  },
+  async removeCandidate(id){ const c = this.candidates.find(x => x.id === id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; await db.collection("candidates").doc(id).delete(); },
+  async resetCandidate(id){ if(!confirm("Let this person book again? Their earlier response is kept.")) return; await db.collection("candidates").doc(id).update({ used:false, responseId:null, usedAt:null }); },
+  renderCandidates(){
+    const q = ($("candSearch").value || "").toLowerCase();
+    const list = this.candidates.filter(c => !q || (c.firstName+" "+c.lastName+" "+c.phone).toLowerCase().includes(q))
+      .sort((a,b) => (a.lastName+a.firstName).localeCompare(b.lastName+b.firstName));
+    const used = this.candidates.filter(c => c.used).length;
+    $("candSummary").textContent = `${this.candidates.length} approved · ${used} booked · ${this.candidates.length-used} not yet`;
+    if(!this.candidates.length){ $("candAdmin").innerHTML = `<p class="muted">Nobody on the list yet. Until you add names, no one can book.</p>`; return; }
+    if(!list.length){ $("candAdmin").innerHTML = `<p class="muted">No matches.</p>`; return; }
+    $("candAdmin").innerHTML = `<table><thead><tr><th>Name</th><th>Phone</th><th>Status</th><th></th></tr></thead><tbody>${list.map(c => `
+      <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td>
+      <td>${c.used?'<span class="pill booked">Booked</span>':'<span class="pill open">Not yet</span>'}</td>
+      <td style="text-align:right">${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
+  },
 
   /* ----- jobs ----- */
   fillJobSelects(){
@@ -621,8 +737,10 @@ const A = {
   },
   async deleteResponse(id, slotId){
     if(!confirm("Delete this response? Their time slot will be freed up.")) return;
+    const r = this.responses.find(x => x.id === id);
     const b = db.batch(); b.delete(db.collection("responses").doc(id));
-    if(slotId) b.update(db.collection("slots").doc(slotId), { booked:false, bookedBy:null, responseId:null, bookedAt:null });
+    if(slotId) b.update(db.collection("slots").doc(slotId), { booked:false, bookedBy:null, responseId:null, candidateId:null, bookedAt:null });
+    if(r && r.candidateId) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, usedAt:null });
     try{ await b.commit(); }catch(e){ await db.collection("responses").doc(id).delete(); }
   },
   exportCsv(){
