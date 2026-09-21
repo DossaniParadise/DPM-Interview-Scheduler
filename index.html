@@ -797,7 +797,7 @@ const A = {
       <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td><td><span class="pill grey">${esc(this.jobTitle(c.job))}</span></td>
       <td id="cres_${c.id}">${c.resumeUrl?`<a href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">${esc(c.resumeName||"Open")}</a> <button class="quiet small" onclick="A.removeResume('${c.id}')">\u2715</button>`:`<button class="quiet small" onclick="A.uploadResume('${c.id}')">Attach</button>`}</td>
       <td>${c.used?'<span class="pill booked">Booked</span>':'<span class="pill open">Not yet</span>'}</td>
-      <td style="text-align:right;white-space:nowrap"><button class="quiet small" onclick="A.openCq('${c.id}')">Prep${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button> ${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
+      <td style="text-align:right;white-space:nowrap"><button class="quiet small" onclick="A.printCandidate('${c.id}')">Print packet</button> <button class="quiet small" onclick="A.openCq('${c.id}')">Prep${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button> ${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
   },
 
   /* ----- staff ----- */
@@ -917,40 +917,68 @@ const A = {
       rows.push([r.firstName,r.lastName,r.phone,this.jobTitle(r.job),r.slotDate,r.slotTime?ampm(r.slotTime):"",(r.staff||[]).join("; "),c&&c.resumeUrl||"",r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toISOString():"",...qs.map(k=>byQ[k]||"")].map(q).join(",")); });
     download("interviews-"+todayIso()+".csv", "\uFEFF"+rows.join("\r\n"), "text/csv;charset=utf-8");
   },
-  printResponse(id){
-    const r=this.responses.find(x=>x.id===id); if(!r) return; const c=this.candFor(r);
-    const ans=Object.entries(r.answers||{}).map(([qid,a])=>`<div class="a"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div>${this.addsFor(r,qid).map(x=>`<div class="v addn">${esc(x.text)} <span class="k">\u2014 added later${x.at?", "+new Date(x.at).toLocaleDateString():""}</span></div>`).join("")}</div>`).join("")||"<p><em>No questions were asked.</em></p>";
+  printResponse(id){ const r=this.responses.find(x=>x.id===id); if(r) this.printPacket(this.candFor(r), r); },
+  printCandidate(cid){ const c=this.candidates.find(x=>x.id===cid); if(!c) return; const r=this.responses.find(x=>x.candidateId===cid && this.confirmed(x)) || this.responses.find(x=>x.candidateId===cid) || null; this.printPacket(c, r); },
+  printPacket(c, r){
+    const first=(r&&r.firstName)||c.firstName, last=(r&&r.lastName)||c.lastName, job=(r&&r.job)||c.job, phone=(r&&r.phone)||c.phone||"";
+    const staff=(r&&r.staff)||[];
     const lines = n => `<table class="lines">${Array.from({length:n},()=>'<tr><td>&nbsp;</td></tr>').join("")}</table>`;
-    const gq = c ? this.iqFor(c) : this.iq.filter(q=>!q.job || q.job===r.job);
+    const ans = r ? (Object.entries(r.answers||{}).map(([qid,a])=>`<div class="a"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div>${this.addsFor(r,qid).map(x=>`<div class="v addn">${esc(x.text)} <span class="k">\u2014 added later${x.at?", "+new Date(x.at).toLocaleDateString():""}</span></div>`).join("")}</div>`).join("")||"<p><em>No questions were asked.</em></p>")
+                  : `<p><em>Not scheduled yet \u2014 the candidate hasn't submitted screening answers.</em></p>`;
+    const gq = this.iq.filter(q=>!q.job || q.job===job);
     const cq = this.cqNorm(c && c.interviewQuestions);
     const who = e => e ? `<span class="who">${esc(this.staffName(e))}</span>` : "";
     const qBlock = (q,i,hint,by) => `<div class="iq"><div class="iqt"><span class="num">${i}.</span> ${esc(q)}${who(by)}</div>${hint?`<div class="hint">${esc(hint)}</div>`:""}${lines(3)}</div>`;
     let n=0;
     const interviewQs = (gq.length||cq.length)
       ? `<div class="pb"></div><h2>Interview questions</h2>`
-        + (gq.length ? gq.map(q=>qBlock(q.text,++n,q.hint,q.askedBy)).join("") : "")
-        + (cq.length ? `<h3>Questions for ${esc(r.firstName)} ${esc(r.lastName)}</h3>`+cq.map(q=>qBlock(q.text,++n,"",q.askedBy)).join("") : "")
+        + gq.map(q=>qBlock(q.text,++n,q.hint,q.askedBy)).join("")
+        + (cq.length ? `<h3>Questions for ${esc(first)} ${esc(last)}</h3>`+cq.map(q=>qBlock(q.text,++n,"",q.askedBy)).join("") : "")
       : "";
-    const resume = c&&c.resumeUrl ? `<div class="pb"></div><h2>Resume \u2014 ${esc(c.resumeName||"")}</h2><p class="m">If the resume doesn't print below, open it separately: <a href="${esc(c.resumeUrl)}">${esc(c.resumeUrl)}</a></p><iframe src="${esc(c.resumeUrl)}"></iframe>` : `<p class="m">No resume attached.</p>`;
-    const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(r.firstName)} ${esc(r.lastName)} \u2014 Interview</title><style>
+    // Resume: render each page to an image through Filestack's document conversion so it prints reliably.
+    const handle = c && c.resumeHandle;
+    const resume = handle
+      ? `<div class="pb"></div><h2>Resume <span class="k">${esc(c.resumeName||"")}</span></h2><div id="pages"><p class="k" id="pgnote">Loading resume\u2026</p></div>
+         <p class="k noprint">Can't see it? <a href="${esc(c.resumeUrl)}" target="_blank">Open the file</a>.</p>`
+      : (c && c.resumeUrl ? `<div class="pb"></div><h2>Resume</h2><p class="k">Open separately: <a href="${esc(c.resumeUrl)}">${esc(c.resumeUrl)}</a></p>` : `<p class="k">No resume attached.</p>`);
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(first)} ${esc(last)} \u2014 Interview packet</title><style>
       body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1c1f1d;margin:40px;font-size:15px;line-height:1.5}
       h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 10px;color:#1f5e4a}.m{color:#6b7280;margin:0 0 6px}
       .box{border:1px solid #dfdcd4;border-radius:8px;margin:16px 0;border-collapse:collapse;width:100%}.box td{padding:8px 14px;width:50%;vertical-align:top}
-      .lines{width:100%;border-collapse:collapse;margin-left:32px;width:calc(100% - 32px)}.lines td{border-bottom:1px solid #cfd4cf;height:26px;padding:0}
-      .a{margin:14px 0}.k{color:#6b7280;font-size:13px}.v{white-space:pre-wrap;margin-top:2px}.addn{border-left:3px solid #1f5e4a;padding-left:10px;margin-top:6px;font-size:14px}
-      .pb{page-break-before:always}iframe{width:100%;height:95vh;border:1px solid #dfdcd4}
-      h3{font-size:15px;margin:26px 0 8px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}
+      .lines{border-collapse:collapse;margin-left:32px;width:calc(100% - 32px)}.lines td{border-bottom:1px solid #cfd4cf;height:26px;padding:0}
+      .a{margin:14px 0}.k{color:#6b7280;font-size:13px;font-weight:400}.v{white-space:pre-wrap;margin-top:2px}.addn{border-left:3px solid #1f5e4a;padding-left:10px;margin-top:6px;font-size:14px}
+      .pb{page-break-before:always}h3{font-size:15px;margin:26px 0 8px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}
       .iq{margin:0 0 18px;page-break-inside:avoid}.iqt{font-weight:600}.num{color:#1f5e4a;display:inline-block;min-width:26px}
       .hint{color:#6b7280;font-size:12.5px;margin:2px 0 4px 32px;font-style:italic}
       .who{float:right;font-size:11px;font-weight:600;color:#1f5e4a;border:1px solid #bfd8cd;border-radius:10px;padding:0 8px;margin-left:8px}
-
-      @media print{.noprint{display:none}body{margin:16mm}}</style></head><body>
-      <p class="noprint"><button onclick="window.print()">Print</button></p>
-      <p class="m">Dossani Paradise \u2014 Interview packet</p><h1>${esc(r.firstName)} ${esc(r.lastName)}</h1><p class="m">${esc(this.jobTitle(r.job))}</p>
-      <table class="box"><tr><td><strong>Interview</strong><br>${r.slotDate?dateLabel(r.slotDate)+" at "+ampm(r.slotTime)+" Central":"\u2014"}</td><td><strong>Phone</strong><br>${esc(r.phone||"")}</td></tr>
-      <tr><td><strong>Interviewers</strong><br>${(r.staff||[]).map(esc).join(", ")||"\u2014"}</td><td><strong>Submitted</strong><br>${r.createdAt&&r.createdAt.toDate?esc(r.createdAt.toDate().toLocaleString()):""}</td></tr></table>
+      .pg{display:block;width:100%;max-width:100%;border:1px solid #e3e3e3;margin:0 0 12px;page-break-inside:avoid;page-break-after:always}
+      @media print{.noprint{display:none}body{margin:14mm}.pg{border:0;margin:0}}</style></head><body>
+      <p class="noprint"><button onclick="window.print()">Print</button> <span class="k" id="ready"></span></p>
+      <p class="m">Dossani Paradise \u2014 Interview packet</p><h1>${esc(first)} ${esc(last)}</h1><p class="m">${esc(this.jobTitle(job))}</p>
+      <table class="box"><tr><td><strong>Interview</strong><br>${r&&r.slotDate?dateLabel(r.slotDate)+" at "+ampm(r.slotTime)+" Central":"<em>Not scheduled yet</em>"}</td><td><strong>Phone</strong><br>${esc(phone)}</td></tr>
+      <tr><td><strong>Interviewers</strong><br>${staff.map(x=>esc(this.staffName(x))).join(", ")||"\u2014"}</td><td><strong>Submitted</strong><br>${r&&r.createdAt&&r.createdAt.toDate?esc(r.createdAt.toDate().toLocaleString()):"\u2014"}</td></tr></table>
       <h2>Screening answers</h2>${ans}${interviewQs}<h2>Overall notes</h2>${lines(6)}${resume}
-      <script>window.addEventListener("load",()=>setTimeout(()=>window.print(),400));<\/script></body></html>`;
+      <script>
+      (function(){
+        var h=${JSON.stringify(handle||"")}; var box=document.getElementById('pages'); var note=document.getElementById('pgnote'); var ready=document.getElementById('ready');
+        function go(){ setTimeout(function(){ window.print(); }, 300); }
+        if(!h){ go(); return; }
+        var MAX=15, done=0, loaded=0;
+        function add(n){
+          if(n>MAX){ finish(); return; }
+          var img=new Image(); img.className='pg'; img.alt='Resume page '+n;
+          img.src='https://cdn.filestackcontent.com/output=format:png,density:110,page:'+n+'/'+h;
+          img.onload=function(){ box.appendChild(img); loaded++; add(n+1); };
+          img.onerror=function(){ finish(); };
+        }
+        function finish(){
+          if(note) note.textContent = loaded ? '' : 'The resume could not be rendered here. Use the link above to open and print it separately.';
+          if(ready) ready.textContent = loaded ? (loaded+' resume page'+(loaded===1?'':'s')+' ready') : '';
+          go();
+        }
+        add(1);
+      })();
+      <\/script></body></html>`;
     const w=window.open("","_blank"); if(!w){ alert("Allow pop-ups to print."); return; } w.document.write(html); w.document.close();
   },
 
