@@ -99,6 +99,41 @@
   .file-btn{position:relative;overflow:hidden;display:inline-block}
   .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
   .sel-inline{width:auto;padding:8px 10px;font-size:15px}
+  /* dashboard */
+  .hello{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:4px 0 22px;flex-wrap:wrap}
+  .hello h1{font-size:28px;margin:0}
+  .hello .sub{color:var(--ink-2)}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .stat .n{font-size:30px;font-weight:700;line-height:1;color:var(--green)}
+  .stat .l{color:var(--ink-2);font-size:14px;margin-top:6px}
+  .next{background:var(--green);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:26px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  .next .k{font-size:13px;opacity:.8;text-transform:uppercase;letter-spacing:.05em}
+  .next .who{font-size:24px;font-weight:700;margin:2px 0}
+  .next .when{font-size:16px;opacity:.95}
+  .next button{background:#fff;color:var(--green)}.next button:hover{background:#e6f0ec}
+  .dayhead{font-size:14px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em;margin:22px 0 10px}
+  .icard{display:grid;grid-template-columns:92px 1fr auto;gap:16px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+  .icard .t{font-size:20px;font-weight:700;color:var(--green)}
+  .icard .t small{display:block;font-size:12px;color:var(--ink-3);font-weight:500}
+  .icard .who{font-weight:600;font-size:17px}
+  .icard .meta{color:var(--ink-2);font-size:14px;margin-top:2px}
+  .icard .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .icard.past{opacity:.6}
+  .empty{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--ink-3)}
+  /* prep panel */
+  .prep{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .prep textarea{min-height:260px;font-size:14px;line-height:1.45}
+  .qrow{display:grid;grid-template-columns:1fr 170px 34px;gap:8px;margin-bottom:8px;align-items:start}
+  .qrow textarea{min-height:44px;padding:8px 10px;font-size:15px}
+  .qrow select{padding:8px 10px;font-size:14px}
+  .qrow button{padding:0;min-height:40px}
+  .sugg{background:var(--amber-tint);border:1px solid #e6d3a6;border-radius:var(--r);padding:10px 12px;margin-bottom:8px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
+  .sugg .grow{flex:1}.sugg .why{color:var(--amber);font-size:12px;margin-top:2px}
+  .modal-wrap{display:none;position:fixed;inset:0;background:rgba(28,31,29,.45);z-index:50;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto}
+  .modal-wrap .card{width:100%;max-width:980px}
+  .askedby{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:20px;background:var(--green-tint);color:var(--green);margin-left:8px;vertical-align:middle}
+  @media (max-width:760px){.prep{grid-template-columns:1fr}.icard{grid-template-columns:1fr}.icard .acts{justify-content:flex-start}.qrow{grid-template-columns:1fr}}
   @media (max-width:640px){.name-grid,.grid2,.grid3{grid-template-columns:1fr}h1{font-size:26px}.card{padding:20px 16px}.wrap{padding:24px 14px 60px}}
 </style>
 </head>
@@ -169,7 +204,8 @@
     <div class="setup" id="setupBox"></div>
 
     <div class="tabs">
-      <button class="on" data-t="jobs" onclick="A.tab('jobs')">1 · Job postings</button>
+      <button class="on" data-t="home" onclick="A.tab('home')">My interviews</button>
+      <button data-t="jobs" onclick="A.tab('jobs')">1 · Job postings</button>
       <button data-t="candidates" onclick="A.tab('candidates')">2 · Candidates<span class="n" id="nCand">0</span></button>
       <button data-t="slots" onclick="A.tab('slots')">3 · Time slots<span class="n" id="nSlots">0</span></button>
       <button data-t="interviews" onclick="A.tab('interviews')">Interviews<span class="n" id="nInt">0</span></button>
@@ -177,8 +213,11 @@
       <button data-t="staff" onclick="A.tab('staff')">Staff</button>
     </div>
 
+    <!-- Home / dashboard -->
+    <div class="panel on" id="p-home"><div id="home"></div></div>
+
     <!-- 1 Jobs -->
-    <div class="panel on" id="p-jobs">
+    <div class="panel" id="p-jobs">
       <div class="card" style="margin-bottom:22px">
         <h2>Job postings</h2>
         <p class="muted" style="margin:0 0 12px">Everything else hangs off a posting: candidates belong to one, slots are created for one, and questions can be scoped to one.</p>
@@ -266,9 +305,10 @@
         <h2>Interview questions <span class="muted" style="font-weight:400">— printed on the interviewer's sheet</span></h2>
         <p class="muted" style="margin:0 0 14px">Candidates never see these. They print with the candidate's screening answers and resume, each with space to write notes. Add questions here that you ask everyone; candidate-specific questions are added from the Interviews or Candidates tab.</p>
         <div class="field"><label class="f">Question</label><textarea id="iqText" style="min-height:64px"></textarea></div>
-        <div class="grid2">
+        <div class="grid3">
           <div class="field"><label class="f">Ask for</label><select id="iqJob"></select></div>
-          <div class="field"><label class="f">What a good answer sounds like (optional, prints in small type)</label><input id="iqHint"></div>
+          <div class="field"><label class="f">Asked by</label><select id="iqWho"></select></div>
+          <div class="field"><label class="f">Good answer sounds like (optional)</label><input id="iqHint"></div>
         </div>
         <div class="row"><button onclick="A.saveIq()" id="iqSaveBtn">Add interview question</button><button class="quiet" onclick="A.cancelIq()" id="iqCancelBtn" style="display:none">Cancel</button><span class="status" id="iqStatus"></span></div>
       </div>
@@ -288,12 +328,25 @@
   </div>
 </div>
 
-<div id="cqModal" style="display:none;position:fixed;inset:0;background:rgba(28,31,29,.45);z-index:50;align-items:center;justify-content:center;padding:16px">
-  <div class="card" style="width:100%;max-width:560px">
-    <h2 id="cqTitle">Questions for this candidate</h2>
-    <p class="muted" style="margin:0 0 12px">One per line. These print under a heading with the candidate's name, after the questions you ask everyone.</p>
-    <textarea id="cqText" style="min-height:180px"></textarea>
-    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="quiet" onclick="A.closeCq()">Cancel</button><button onclick="A.saveCq()">Save</button></div>
+<div id="cqModal" class="modal-wrap">
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 id="cqTitle" style="margin:0">Interview prep</h2><button class="quiet small" onclick="A.closeCq()">Close</button></div>
+    <p class="muted" style="margin:0 0 16px" id="cqSub"></p>
+    <div class="prep">
+      <div>
+        <label class="f">Resume text <span class="muted">— paste it here to keep it with the candidate</span></label>
+        <textarea id="cqResume" placeholder="Paste the resume text…"></textarea>
+        <div class="row" style="margin-top:8px"><button class="quiet small" onclick="A.suggestCq()">Suggest questions from resume</button><span class="muted" id="cqSuggNote"></span></div>
+        <div id="cqSugg" style="margin-top:10px"></div>
+      </div>
+      <div>
+        <label class="f">Questions for this candidate <span class="muted">— each one names who asks it</span></label>
+        <div id="cqRows"></div>
+        <button class="quiet small" onclick="A.addCqRow()">Add a question</button>
+        <p class="muted" style="margin:14px 0 0;font-size:13px">These print after the questions you ask everyone, under a heading with the candidate's name.</p>
+      </div>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:18px"><button class="quiet" onclick="A.closeCq()">Cancel</button><button onclick="A.saveCq()">Save</button></div>
   </div>
 </div>
 
@@ -509,7 +562,7 @@ const A = {
         $("adminLogin").style.display="none"; $("adminApp").style.display="block"; $("whoami").textContent=u.email; $("logoutBtn").style.display="";
         // Auto-register this staff member so they can be assigned to slots.
         try{ await db.collection("staff").doc(u.uid).set({ email:u.email, name:u.displayName||u.email.split("@")[0], uid:u.uid, lastSeen:TS() }, { merge:true }); }catch(e){ console.warn(e); }
-        this.subscribe();
+        this.subscribe(); this.tab("home");
       }else{ $("adminLogin").style.display="block"; $("adminApp").style.display="none"; $("whoami").textContent=""; $("logoutBtn").style.display="none"; this.unsubscribe(); }
     });
     $("aPass").addEventListener("keydown", e => { if(e.key==="Enter") this.login(); });
@@ -517,20 +570,43 @@ const A = {
   },
   async login(){ $("aErr").textContent=""; try{ await auth.signInWithEmailAndPassword($("aEmail").value.trim(), $("aPass").value); }catch(e){ $("aErr").textContent="Sign-in failed. Check the email and password."; } },
   logout(){ auth.signOut(); },
-  tab(t){ document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t===t)); document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id==="p-"+t)); },
+  tab(t){ document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t===t)); document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id==="p-"+t)); $("setupBox").style.display = t==="home"||t==="interviews" ? "none" : ""; },
 
   subscribe(){
     this.unsubscribe();
     const push = (u) => this.unsubs.push(u);
     push(db.doc("config/jobs").onSnapshot(d => { this.jobs = ((d.exists && d.data().list) || []).map(j => typeof j==="string" ? {id:"legacy_"+nameKey(j,""),title:j} : j); this.renderJobs(); this.fillJobSelects(); this.renderSetup(); }));
     push(db.doc("config/questions").onSnapshot(d => { this.questions = (d.exists && d.data().list) || []; this.renderQuestions(); }));
-    push(db.doc("config/interviewQuestions").onSnapshot(d => { this.iq = (d.exists && d.data().list) || []; this.renderIq(); }));
-    push(db.collection("staff").onSnapshot(s => { this.staff = s.docs.map(d => ({id:d.id,...d.data()})); this.renderStaff(); this.fillStaffPick(); }));
-    push(db.collection("candidates").onSnapshot(s => { this.candidates = s.docs.map(d => ({id:d.id,...d.data()})); this.renderCandidates(); this.renderSetup(); }, e => $("candAdmin").innerHTML=`<p class="err">Can't read candidates: ${esc(e.message)}</p>`));
+    push(db.doc("config/interviewQuestions").onSnapshot(d => { this.iq = (d.exists && d.data().list) || []; this.renderIq(); this.renderHome(); }));
+    push(db.collection("staff").onSnapshot(s => { this.staff = s.docs.map(d => ({id:d.id,...d.data()})); this.renderStaff(); this.fillStaffPick(); this.fillStaffSelects(); this.renderHome(); }));
+    push(db.collection("candidates").onSnapshot(s => { this.candidates = s.docs.map(d => ({id:d.id,...d.data()})); this.renderCandidates(); this.renderSetup(); this.renderHome(); }, e => $("candAdmin").innerHTML=`<p class="err">Can't read candidates: ${esc(e.message)}</p>`));
     push(db.collection("slots").onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id,...d.data()})); this.renderSlots(); this.renderInterviews(); this.renderSetup(); }));
-    push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id,...d.data()})); this.renderInterviews(); }, e => $("intList").innerHTML=`<p class="err">Can't read responses: ${esc(e.message)}</p>`));
+    push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id,...d.data()})); this.renderInterviews(); this.renderHome(); }, e => $("intList").innerHTML=`<p class="err">Can't read responses: ${esc(e.message)}</p>`));
   },
   unsubscribe(){ this.unsubs.forEach(u => u()); this.unsubs=[]; },
+
+  renderHome(){
+    const box=$("home"); if(!box||!this.me) return;
+    const me=(this.me.email||"").toLowerCase(); const name=this.staffName(me)||me.split("@")[0];
+    const t=todayIso(), nm=nowMin();
+    const mine=this.responses.filter(r=>(r.staff||[]).map(x=>x.toLowerCase()).includes(me)).sort((a,b)=>(a.slotDate+a.slotTime).localeCompare(b.slotDate+b.slotTime));
+    const upcoming=mine.filter(r=>r.slotDate>t||(r.slotDate===t&&toMin(r.slotTime)+(r.slotLength||30)>nm));
+    const today=upcoming.filter(r=>r.slotDate===t), next=upcoming[0];
+    const myQs=this.iq.filter(q=>(q.askedBy||"").toLowerCase()===me).length;
+    const h=new Date().getHours(); const greet=h<12?"Good morning":h<17?"Good afternoon":"Good evening";
+    const card=r=>{ const c=this.candFor(r); const past=r.slotDate<t||(r.slotDate===t&&toMin(r.slotTime)+(r.slotLength||30)<=nm);
+      return `<div class="icard ${past?'past':''}"><div class="t">${ampm(r.slotTime)}<small>${r.slotLength||30} min</small></div>
+        <div><div class="who">${esc(r.firstName)} ${esc(r.lastName)}</div><div class="meta">${esc(this.jobTitle(r.job))} \u00b7 ${esc(r.phone||"")}${(r.staff||[]).length>1?" \u00b7 with "+(r.staff||[]).filter(x=>x.toLowerCase()!==me).map(x=>esc(this.staffName(x))).join(", "):""}${c&&this.cqNorm(c.interviewQuestions).length?` \u00b7 ${this.cqNorm(c.interviewQuestions).length} prep question${this.cqNorm(c.interviewQuestions).length===1?"":"s"}`:""}</div></div>
+        <div class="acts"><button class="small" onclick="A.printResponse('${r.id}')">Print packet</button>${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep</button>`:""}${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Resume</a>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Calendar</button></div></div>`; };
+    const by={}; upcoming.forEach(r=>(by[r.slotDate]=by[r.slotDate]||[]).push(r));
+    box.innerHTML=`
+      <div class="hello"><div><h1>${greet}, ${esc(name)}.</h1><div class="sub">${today.length?`You have ${today.length} interview${today.length===1?"":"s"} today.`:upcoming.length?`Your next interview is ${shortDate(next.slotDate)}.`:"Nothing on your calendar yet."}</div></div>
+        ${upcoming.length?`<button class="quiet" onclick="$('intWho').value='mine';A.exportIcs()">Send all to Outlook / Teams</button>`:""}</div>
+      <div class="stats"><div class="stat"><div class="n">${today.length}</div><div class="l">Today</div></div><div class="stat"><div class="n">${upcoming.length}</div><div class="l">Upcoming, assigned to you</div></div><div class="stat"><div class="n">${this.responses.length}</div><div class="l">Booked overall</div></div><div class="stat"><div class="n">${myQs}</div><div class="l">Questions you ask everyone</div></div></div>
+      ${next?`<div class="next"><div><div class="k">Up next</div><div class="who">${esc(next.firstName)} ${esc(next.lastName)}</div><div class="when">${dateLabel(next.slotDate)} at ${ampm(next.slotTime)} \u00b7 ${esc(this.jobTitle(next.job))} \u00b7 ${esc(next.phone||"")}</div></div><div class="row"><button onclick="A.printResponse('${next.id}')">Print packet</button>${this.candFor(next)?`<button onclick="A.openCq('${this.candFor(next).id}')">Prep questions</button>`:""}</div></div>`:""}
+      ${Object.keys(by).length?Object.keys(by).sort().map(d=>`<div class="dayhead">${d===t?"Today \u00b7 ":""}${dateLabel(d)}</div>${by[d].map(card).join("")}`).join(""):`<div class="empty">No upcoming interviews assigned to you.<br><span style="font-size:14px">Interviews appear here once you're picked as an interviewer when slots are created, or added on a slot afterward.</span></div>`}
+      ${mine.length>upcoming.length?`<div class="dayhead">Past</div>${mine.filter(r=>!upcoming.includes(r)).slice(-5).reverse().map(card).join("")}`:""}`;
+  },
 
   jobTitle(id){ const j = this.jobs.find(x => x.id===id); return j ? j.title : (id||""); },
   fillJobSelects(){
@@ -539,6 +615,7 @@ const A = {
     $("candJob").innerHTML = none+opts; $("gJob").innerHTML = none+opts;
     $("qJob").innerHTML = `<option value="">All postings</option>`+opts;
     $("iqJob").innerHTML = `<option value="">Every candidate</option>`+opts;
+    this.fillStaffSelects();
     ["candFilterJob","slotFilterJob","intJob"].forEach(id => $(id).innerHTML = `<option value="">All postings</option>`+opts);
     const blocked = !this.jobs.length; $("candForm").classList.toggle("blocked", blocked); $("slotForm").classList.toggle("blocked", blocked);
     this.previewSlots();
@@ -640,10 +717,13 @@ const A = {
       <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td><td><span class="pill grey">${esc(this.jobTitle(c.job))}</span></td>
       <td id="cres_${c.id}">${c.resumeUrl?`<a href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">${esc(c.resumeName||"Open")}</a> <button class="quiet small" onclick="A.removeResume('${c.id}')">\u2715</button>`:`<button class="quiet small" onclick="A.uploadResume('${c.id}')">Attach</button>`}</td>
       <td>${c.used?'<span class="pill booked">Booked</span>':'<span class="pill open">Not yet</span>'}</td>
-      <td style="text-align:right;white-space:nowrap"><button class="quiet small" onclick="A.openCq('${c.id}')">Questions${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button> ${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
+      <td style="text-align:right;white-space:nowrap"><button class="quiet small" onclick="A.openCq('${c.id}')">Prep${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button> ${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
   },
 
   /* ----- staff ----- */
+  staffName(email){ const st=this.staff.find(x=>(x.email||"").toLowerCase()===(email||"").toLowerCase()); return st ? (st.name||st.email) : (email||""); },
+  staffOptions(sel){ return `<option value="">Anyone</option>`+this.staff.map(x=>`<option value="${esc(x.email)}" ${sel&&sel.toLowerCase()===(x.email||"").toLowerCase()?"selected":""}>${esc(x.name||x.email)}</option>`).join(""); },
+  fillStaffSelects(){ const cur=$("iqWho").value; $("iqWho").innerHTML=this.staffOptions(cur); },
   fillStaffPick(){
     $("gStaff").innerHTML = this.staff.length ? this.staff.map(s => `<label><input type="checkbox" value="${esc(s.email)}" ${this.me&&s.email===this.me.email?'checked':''}>${esc(s.name||s.email)}</label>`).join("") : `<span class="muted">No staff yet \u2014 add them on the Staff tab.</span>`;
   },
@@ -725,7 +805,7 @@ const A = {
       const ans=Object.values(r.answers||{}).map(a=>`<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||'<span class="muted">(blank)</span>')}</div></div>`).join("")||`<p class="muted">No questions were asked.</p>`;
       return `<details class="resp" ${past?'':''}><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="pill booked">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}</span><span class="pill grey">${esc(this.jobTitle(r.job))}</span><span class="muted">${(r.staff||[]).map(esc).join(", ")||"no interviewer assigned"}</span></summary>
         <div class="body"><p class="muted" style="margin:10px 0 0">${esc(r.phone||"")}</p>${ans}
-        <div class="row" style="margin-top:12px"><button class="small" onclick="A.printResponse('${r.id}')">Print interview packet</button>${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Open resume</a>`:`<span class="muted">No resume attached</span>`}${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Candidate questions${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Add to calendar</button><button class="danger small" onclick="A.deleteResponse('${r.id}')">Delete</button></div></div></details>`;
+        <div class="row" style="margin-top:12px"><button class="small" onclick="A.printResponse('${r.id}')">Print interview packet</button>${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Open resume</a>`:`<span class="muted">No resume attached</span>`}${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep questions${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Add to calendar</button><button class="danger small" onclick="A.deleteResponse('${r.id}')">Delete</button></div></div></details>`;
     }).join("");
   },
   async deleteResponse(id){
@@ -758,13 +838,14 @@ const A = {
     const ans=Object.values(r.answers||{}).map(a=>`<div class="a"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div></div>`).join("")||"<p><em>No questions were asked.</em></p>";
     const lines = n => `<table class="lines">${Array.from({length:n},()=>'<tr><td>&nbsp;</td></tr>').join("")}</table>`;
     const gq = c ? this.iqFor(c) : this.iq.filter(q=>!q.job || q.job===r.job);
-    const cq = (c && c.interviewQuestions) || [];
-    const qBlock = (q,i,hint) => `<div class="iq"><div class="iqt"><span class="num">${i}.</span> ${esc(q)}</div>${hint?`<div class="hint">${esc(hint)}</div>`:""}${lines(3)}</div>`;
+    const cq = this.cqNorm(c && c.interviewQuestions);
+    const who = e => e ? `<span class="who">${esc(this.staffName(e))}</span>` : "";
+    const qBlock = (q,i,hint,by) => `<div class="iq"><div class="iqt"><span class="num">${i}.</span> ${esc(q)}${who(by)}</div>${hint?`<div class="hint">${esc(hint)}</div>`:""}${lines(3)}</div>`;
     let n=0;
     const interviewQs = (gq.length||cq.length)
       ? `<div class="pb"></div><h2>Interview questions</h2>`
-        + (gq.length ? gq.map(q=>qBlock(q.text,++n,q.hint)).join("") : "")
-        + (cq.length ? `<h3>Questions for ${esc(r.firstName)} ${esc(r.lastName)}</h3>`+cq.map(q=>qBlock(q,++n,"")).join("") : "")
+        + (gq.length ? gq.map(q=>qBlock(q.text,++n,q.hint,q.askedBy)).join("") : "")
+        + (cq.length ? `<h3>Questions for ${esc(r.firstName)} ${esc(r.lastName)}</h3>`+cq.map(q=>qBlock(q.text,++n,"",q.askedBy)).join("") : "")
       : "";
     const resume = c&&c.resumeUrl ? `<div class="pb"></div><h2>Resume \u2014 ${esc(c.resumeName||"")}</h2><p class="m">If the resume doesn't print below, open it separately: <a href="${esc(c.resumeUrl)}">${esc(c.resumeUrl)}</a></p><iframe src="${esc(c.resumeUrl)}"></iframe>` : `<p class="m">No resume attached.</p>`;
     const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(r.firstName)} ${esc(r.lastName)} \u2014 Interview</title><style>
@@ -777,6 +858,7 @@ const A = {
       h3{font-size:15px;margin:26px 0 8px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}
       .iq{margin:0 0 18px;page-break-inside:avoid}.iqt{font-weight:600}.num{color:#1f5e4a;display:inline-block;min-width:26px}
       .hint{color:#6b7280;font-size:12.5px;margin:2px 0 4px 32px;font-style:italic}
+      .who{float:right;font-size:11px;font-weight:600;color:#1f5e4a;border:1px solid #bfd8cd;border-radius:10px;padding:0 8px;margin-left:8px}
 
       @media print{.noprint{display:none}body{margin:16mm}}</style></head><body>
       <p class="noprint"><button onclick="window.print()">Print</button></p>
@@ -791,35 +873,75 @@ const A = {
   /* ----- interview questions (printed) ----- */
   async saveIqList(list){ await db.doc("config/interviewQuestions").set({ list, updatedAt:TS() }); },
   async saveIq(){
-    const text=$("iqText").value.trim(), job=$("iqJob").value, hint=$("iqHint").value.trim();
+    const text=$("iqText").value.trim(), job=$("iqJob").value, hint=$("iqHint").value.trim(), askedBy=$("iqWho").value;
     if(!text){ $("iqStatus").textContent="Enter the question."; return; }
     const list=this.iq.slice();
-    if(this.editingIq){ const i=list.findIndex(q=>q.id===this.editingIq); list[i]={...list[i],text,job,hint}; } else list.push({ id:"iq"+Date.now().toString(36), text, job, hint });
+    if(this.editingIq){ const i=list.findIndex(q=>q.id===this.editingIq); list[i]={...list[i],text,job,hint,askedBy}; } else list.push({ id:"iq"+Date.now().toString(36), text, job, hint, askedBy });
     await this.saveIqList(list); this.cancelIq(); $("iqStatus").textContent="Saved.";
   },
-  editIq(id){ const q=this.iq.find(x=>x.id===id); if(!q) return; this.editingIq=id; $("iqText").value=q.text; $("iqJob").value=q.job||""; $("iqHint").value=q.hint||""; $("iqSaveBtn").textContent="Save changes"; $("iqCancelBtn").style.display=""; $("iqText").focus(); },
-  cancelIq(){ this.editingIq=null; $("iqText").value=""; $("iqJob").value=""; $("iqHint").value=""; $("iqSaveBtn").textContent="Add interview question"; $("iqCancelBtn").style.display="none"; },
+  editIq(id){ const q=this.iq.find(x=>x.id===id); if(!q) return; this.editingIq=id; $("iqText").value=q.text; $("iqJob").value=q.job||""; $("iqHint").value=q.hint||""; $("iqWho").value=q.askedBy||""; $("iqSaveBtn").textContent="Save changes"; $("iqCancelBtn").style.display=""; $("iqText").focus(); },
+  cancelIq(){ this.editingIq=null; $("iqText").value=""; $("iqJob").value=""; $("iqHint").value=""; $("iqWho").value=""; $("iqSaveBtn").textContent="Add interview question"; $("iqCancelBtn").style.display="none"; },
   async removeIq(id){ if(!confirm("Delete this interview question?")) return; await this.saveIqList(this.iq.filter(q=>q.id!==id)); },
   async moveIq(i,d){ const l=this.iq.slice(); const [x]=l.splice(i,1); l.splice(i+d,0,x); await this.saveIqList(l); },
   renderIq(){
-    $("iqAdmin").innerHTML=this.iq.length?this.iq.map((q,i)=>`<div class="list-item" style="align-items:flex-start"><div class="grow"><div>${esc(q.text)}</div><div class="muted">${q.job?esc(this.jobTitle(q.job)):"Every candidate"}${q.hint?" \u00b7 "+esc(q.hint):""}</div></div>
+    $("iqAdmin").innerHTML=this.iq.length?this.iq.map((q,i)=>`<div class="list-item" style="align-items:flex-start"><div class="grow"><div>${esc(q.text)}</div><div class="muted">${q.job?esc(this.jobTitle(q.job)):"Every candidate"} \u00b7 asked by ${q.askedBy?esc(this.staffName(q.askedBy)):"anyone"}${q.hint?" \u00b7 "+esc(q.hint):""}</div></div>
       <button class="quiet small" onclick="A.moveIq(${i},-1)" ${i===0?'disabled':''}>\u2191</button><button class="quiet small" onclick="A.moveIq(${i},1)" ${i===this.iq.length-1?'disabled':''}>\u2193</button><button class="quiet small" onclick="A.editIq('${q.id}')">Edit</button><button class="danger small" onclick="A.removeIq('${q.id}')">Delete</button></div>`).join("")
       :`<p class="muted">No interview questions yet. The printed sheet will only have screening answers and a notes box.</p>`;
   },
   iqFor(c){ return this.iq.filter(q=>!q.job || q.job===c.job); },
 
+  cqNorm(list){ return (list||[]).map(q=>typeof q==="string"?{text:q,askedBy:""}:q); },
   openCq(id){
     const c=this.candidates.find(x=>x.id===id); if(!c) return;
-    this.cqId=id; $("cqTitle").textContent=`Questions for ${c.firstName} ${c.lastName}`; $("cqText").value=(c.interviewQuestions||[]).join("\n");
-    $("cqModal").style.display="flex"; $("cqText").focus();
+    this.cqId=id; $("cqTitle").textContent=`Interview prep \u2014 ${c.firstName} ${c.lastName}`; $("cqSub").textContent=this.jobTitle(c.job)+(c.resumeUrl?" \u00b7 resume attached":"");
+    $("cqResume").value=c.resumeText||""; $("cqSugg").innerHTML=""; $("cqSuggNote").textContent="";
+    const qs=this.cqNorm(c.interviewQuestions); $("cqRows").innerHTML=""; (qs.length?qs:[{text:"",askedBy:""}]).forEach(q=>this.addCqRow(q));
+    $("cqModal").style.display="flex";
+  },
+  addCqRow(q={text:"",askedBy:""}){
+    const d=document.createElement("div"); d.className="qrow";
+    d.innerHTML=`<textarea placeholder="Question\u2026">${esc(q.text)}</textarea><select>${this.staffOptions(q.askedBy)}</select><button class="quiet small" title="Remove" onclick="this.parentNode.remove()">\u2715</button>`;
+    $("cqRows").appendChild(d);
   },
   closeCq(){ this.cqId=null; $("cqModal").style.display="none"; },
   async saveCq(){
     if(!this.cqId) return;
-    const list=$("cqText").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-    await db.collection("candidates").doc(this.cqId).update({ interviewQuestions:list });
+    const list=[...$("cqRows").querySelectorAll(".qrow")].map(r=>({ text:r.querySelector("textarea").value.trim(), askedBy:r.querySelector("select").value })).filter(q=>q.text);
+    await db.collection("candidates").doc(this.cqId).update({ interviewQuestions:list, resumeText:$("cqResume").value });
     this.closeCq();
   },
+  // Heuristic pass over pasted resume text: dates, gaps, overlaps, short stints, in-progress education.
+  suggestCq(){
+    const txt=$("cqResume").value; const out=$("cqSugg"); const note=$("cqSuggNote"); out.innerHTML="";
+    if(!txt.trim()){ note.textContent="Paste the resume text first."; return; }
+    const MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+    const parse=t=>{ t=t.trim().toLowerCase(); if(/^(present|current|now|today)$/.test(t)) return new Date();
+      let m=t.match(/^([a-z]{3,9})\.?\s+(\d{4})$/); if(m&&MON[m[1].slice(0,4)]!==undefined||m&&MON[m[1].slice(0,3)]!==undefined) return new Date(+m[2], MON[m[1].slice(0,4)]??MON[m[1].slice(0,3)], 1);
+      m=t.match(/^(\d{1,2})\/(\d{4})$/); if(m) return new Date(+m[2], +m[1]-1, 1);
+      m=t.match(/^(\d{4})$/); if(m) return new Date(+m[1], 0, 1); return null; };
+    const D="(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?\\s+\\d{4}|\\d{1,2}\\/\\d{4}|\\d{4}|present|current|now|today)";
+    const re=new RegExp("("+D+")\\s*(?:[-\u2013\u2014]|to)\\s*("+D+")","gi");
+    const lines=txt.split(/\r?\n/); const ranges=[];
+    lines.forEach((ln,i)=>{ let m; re.lastIndex=0; while((m=re.exec(ln))){ const a=parse(m[1]), b=parse(m[2]); if(a&&b&&b>=a){ const label=(lines[i].replace(m[0],"").trim()||lines[i-1]||"").replace(/[|\u2022\-\u2013]+$/,"").trim().slice(0,70); ranges.push({a,b,label:label||("line "+(i+1)),present:/present|current|now|today/i.test(m[2])}); } } });
+    const sugg=[]; const fmt=d=>d.toLocaleDateString("en-US",{month:"short",year:"numeric"}); const months=(a,b)=>(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
+    ranges.sort((x,y)=>x.a-y.a);
+    for(let i=0;i<ranges.length;i++){
+      const r=ranges[i];
+      if(months(r.a,r.b)<=6 && !r.present) sugg.push({q:`${r.label} shows about ${Math.max(1,months(r.a,r.b))} month${months(r.a,r.b)===1?"":"s"}. What prompted the move?`,why:"Short stint"});
+      if(i>0){ const p=ranges[i-1]; const g=months(p.b,r.a); if(g>=4) sugg.push({q:`There's about ${g} months between ${fmt(p.b)} and ${fmt(r.a)} with nothing listed. Walk me through that period.`,why:"Gap"});
+        const isEdu=x=>/universit|college|school|academy|bachelor|associate|degree|b\.?s\.?|b\.?a\.?|bootcamp|certif/i.test(x.label);
+        for(let j=0;j<i;j++){ const o=ranges[j]; if(isEdu(o)||isEdu(r)) continue; if(o.b>r.a && months(r.a,o.b)>=2 && !(o.present&&r.present)) sugg.push({q:`${o.label} and ${r.label} look like they overlap. What were you doing in each?`,why:"Overlap"}); } }
+    }
+    const pres=ranges.filter(r=>r.present); if(pres.length>=2) sugg.push({q:`You list ${pres.length} current roles (${pres.map(r=>r.label).join("; ")}). Which is full-time, and what changes if you take this job?`,why:"Multiple current roles"});
+    const edu=txt.match(/(expected|anticipated)\s+(graduation\s+)?(\w+\s+)?(20\d\d)/i); if(edu) sugg.push({q:`Your degree is expected ${edu[4]}. Walk me through your class schedule and how full-time hours fit.`,why:"Degree in progress"});
+    if(/in progress|pursuing|currently enrolled/i.test(txt)) sugg.push({q:`Something on your resume is marked in progress. What's the timeline, and does it affect your availability?`,why:"In progress"});
+    const dedup=[]; const seen=new Set(); sugg.forEach(x=>{ if(!seen.has(x.q)){ seen.add(x.q); dedup.push(x); } });
+    if(!dedup.length){ note.textContent=ranges.length?"Dates look clean \u2014 nothing mechanical to flag. Write the judgment questions by hand.":"No date ranges found. This only catches dates, gaps, and overlaps."; return; }
+    note.textContent=`${dedup.length} suggestion${dedup.length===1?"":"s"} \u2014 mechanical checks only; add the judgment questions yourself.`;
+    out.innerHTML=dedup.map((x,i)=>`<div class="sugg" id="sg${i}"><div class="grow">${esc(x.q)}<div class="why">${esc(x.why)}</div></div><button class="small" onclick="A.acceptSugg(${i})">Add</button></div>`).join("");
+    this._sugg=dedup;
+  },
+  acceptSugg(i){ const x=this._sugg&&this._sugg[i]; if(!x) return; const rows=[...$("cqRows").querySelectorAll(".qrow")]; const last=rows[rows.length-1]; if(last && !last.querySelector("textarea").value.trim()) last.querySelector("textarea").value=x.q; else this.addCqRow({text:x.q,askedBy:""}); const el=$("sg"+i); if(el) el.remove(); },
 
   /* ----- questions ----- */
   qTypeChanged(){ const t=$("qType").value; $("qOptsWrap").style.display=t==="text"?"none":"block"; if(t!=="text"&&!$("qOpts").children.length){ this.addOpt(); this.addOpt(); } },
