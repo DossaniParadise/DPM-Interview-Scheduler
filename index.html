@@ -56,6 +56,11 @@
   .slot small{display:block;font-weight:500;font-size:11px;text-decoration:none}
   .confirm-box{background:var(--green-tint);border:1px solid #bfd8cd;border-radius:var(--r);padding:18px 20px;margin:16px 0}
   .confirm-box strong{display:block;font-size:22px}
+  .ret{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;background:var(--paper)}
+  .ret .rq{font-size:14px;color:var(--ink-3)}.ret .ra{white-space:pre-wrap;margin:4px 0 8px}
+  .ret .add{border-left:3px solid var(--green);padding:6px 10px;margin:6px 0;background:var(--green-tint);border-radius:0 8px 8px 0;white-space:pre-wrap;font-size:15px}
+  .ret .add small{display:block;color:var(--ink-3);font-size:12px}
+  .ret .addrow{display:flex;gap:8px;margin-top:6px}.ret .addrow input{padding:9px 12px;font-size:15px}
   .jobtag{display:inline-block;background:var(--green-tint);color:var(--green);border-radius:20px;padding:3px 12px;font-size:14px;font-weight:600;margin-bottom:18px}
 
   /* admin */
@@ -145,7 +150,7 @@
 
   <section id="s1" class="card" style="display:none">
     <h1>Let's get you scheduled.</h1>
-    <p class="lead">Enter your name as it appears on your application. A few short questions, then you pick a time to talk with us.</p>
+    <p class="lead">Enter your name as it appears on your application. A few short questions, then you pick a time. Already booked? Sign in the same way to change your time or add to your answers.</p>
     <div class="name-grid">
       <div class="field"><label class="f" for="fn">First name</label><input id="fn" autocomplete="given-name"></div>
       <div class="field"><label class="f" for="ln">Last name</label><input id="ln" autocomplete="family-name"></div>
@@ -177,8 +182,30 @@
     <h1>You're booked.</h1>
     <p class="lead">We'll call you at the number on your application. Here's your time:</p>
     <div class="confirm-box"><strong id="doneSlot"></strong><span id="doneWho"></span></div>
-    <button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button>
-    <p class="muted" style="margin-top:18px">Need to change it? Contact us and we'll move it — this link only works once.</p>
+    <div class="row"><button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button><button class="quiet" onclick="C.showReturn()">View my answers</button></div>
+    <p class="muted" style="margin-top:18px">Need to change it? Come back to this page any time, enter your name and last 4 digits, and you can pick a new time or add to your answers.</p>
+  </section>
+
+  <!-- returning candidate -->
+  <section id="s6" class="card" style="display:none">
+    <div class="jobtag" id="jobTag6"></div>
+    <h1>Welcome back.</h1>
+    <p class="lead">Your interview is booked. You can change the time or add to your answers below.</p>
+    <div class="confirm-box"><strong id="retSlot"></strong><span id="retWho"></span></div>
+    <div class="row" style="margin-bottom:26px"><button onclick="C.startReschedule()">Change my time</button><button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button></div>
+    <h2 style="margin-bottom:4px">Your answers</h2>
+    <p class="muted" style="margin:0 0 14px">What you submitted can't be changed, but you can add a note under any answer.</p>
+    <div id="retAnswers"></div>
+    <div class="err" id="e6"></div>
+  </section>
+
+  <section id="s7" class="card" style="display:none">
+    <div class="jobtag" id="jobTag7"></div>
+    <h1>Pick a new time.</h1>
+    <p class="lead" id="slotLead7">Your current time stays booked until you confirm a new one.</p>
+    <div id="slotList7"><p class="muted">Loading…</p></div>
+    <div class="err" id="e7"></div>
+    <div class="nav"><button class="quiet" onclick="C.show(6)">Keep my current time</button><button id="rebookBtn" onclick="C.reschedule()">Move to this time</button></div>
   </section>
 
   <p class="muted" style="text-align:center;margin-top:40px;font-size:13px"><a href="#/admin" style="color:var(--ink-3)">Staff sign-in</a></p>
@@ -424,8 +451,8 @@ function buildIcs(events){
    CANDIDATE
    ============================================================ */
 const C = {
-  step:1, jobs:[], questions:[], slots:[], unsub:null, fails:0, lockedUntil:0, booked:null,
-  data:{ firstName:"", lastName:"", phone:"", job:"", jobTitle:"", answers:{}, slotId:"", candidateId:"" },
+  step:1, jobs:[], questions:[], slots:[], unsub:null, fails:0, lockedUntil:0, booked:null, cand:null,
+  data:{ firstName:"", lastName:"", phone:"", job:"", jobTitle:"", answers:{}, slotId:"", candidateId:"", responseId:"" },
 
   async init(){
     $("candidateView").style.display = "block";
@@ -436,10 +463,12 @@ const C = {
     this.show(1);
   },
   show(n){
-    this.step = n; ["s1","s3","s4","s5"].forEach(id => $(id).style.display = "none"); $("s"+n).style.display = "block";
-    const map = {1:"Step 1 of 3",3:"Step 2 of 3",4:"Step 3 of 3",5:""}; $("stepLabel").textContent = map[n] || "";
+    this.step = n; ["s1","s3","s4","s5","s6","s7"].forEach(id => $(id).style.display = "none"); $("s"+n).style.display = "block";
+    const map = {1:"Step 1 of 3",3:"Step 2 of 3",4:"Step 3 of 3"}; $("stepLabel").textContent = map[n] || "";
     if(n===3){ $("jobTag3").textContent = this.data.jobTitle; this.renderQuestions(); }
     if(n===4){ $("jobTag4").textContent = this.data.jobTitle; this.watchSlots(); this.renderSlots(); }
+    if(n===6){ $("jobTag6").textContent = this.data.jobTitle; this.renderReturn(); }
+    if(n===7){ $("jobTag7").textContent = this.data.jobTitle; this.watchSlots(); this.renderSlots(); }
     window.scrollTo({top:0});
   },
 
@@ -458,10 +487,10 @@ const C = {
         else e.textContent="We couldn't find that name and number together. Check the spelling matches your application, or contact the person who sent you this link.";
         return;
       }
-      const c = d.data();
-      if(c.used){ e.textContent="You've already booked a time. If you need to change it, contact us and we'll move it."; return; }
+      const c = d.data(); this.cand = c;
       const job = this.jobs.find(j => j.id === c.job);
-      Object.assign(this.data, { firstName:c.firstName||fn, lastName:c.lastName||ln, phone:c.phone||"", candidateId:id, job:c.job||"", jobTitle:(job&&job.title)||c.jobTitle||"" });
+      Object.assign(this.data, { firstName:c.firstName||fn, lastName:c.lastName||ln, phone:c.phone||"", candidateId:id, job:c.job||"", jobTitle:(job&&job.title)||c.jobTitle||"", responseId:c.responseId||"" });
+      if(c.used && c.responseId){ this.data.slotId=c.slotId||""; this.data.answers=c.answers||{}; this.booked={ date:c.slotDate, time:c.slotTime, length:c.slotLength||30, who:this.data.firstName+" "+this.data.lastName }; this.show(6); return; }
       this.show(3);
     }catch(err){ console.error(err); e.textContent="Couldn't check your details right now. Please try again in a moment."; }
     finally{ btn.disabled=false; btn.textContent="Continue"; }
@@ -470,7 +499,7 @@ const C = {
   activeQuestions(){ return this.questions.filter(q => !q.job || q.job === this.data.job); },
   renderQuestions(){
     const qs = this.activeQuestions();
-    if(!qs.length){ $("qList").innerHTML = `<p class="muted">No questions for this position — go ahead and pick a time.</p>`; return; }
+    if(!qs.length){ $("qList").innerHTML = `<p class="muted">No questions for this position \u2014 go ahead and pick a time.</p>`; return; }
     $("qList").innerHTML = qs.map(q => {
       const req = q.required ? `<span class="req">*</span>` : "";
       if(q.type==="text") return `<div class="q" id="q_wrap_${q.id}"><div class="qt">${esc(q.text)}${req}</div><textarea id="q_${q.id}"></textarea></div>`;
@@ -496,55 +525,106 @@ const C = {
 
   watchSlots(){
     if(this.unsub) return;
-    // Equality filter only — date is filtered client-side so no composite index is needed.
-    this.unsub = db.collection("slots").where("job","==",this.data.job).onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id,...d.data()})); if(this.step===4) this.renderSlots(); }, e => console.warn(e));
+    this.unsub = db.collection("slots").where("job","==",this.data.job).onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id,...d.data()})); if(this.step===4||this.step===7) this.renderSlots(); }, e => console.warn(e));
   },
   renderSlots(){
+    const re = this.step===7; const list=$(re?"slotList7":"slotList"), btn=$(re?"rebookBtn":"bookBtn"), lead=$(re?"slotLead7":"slotLead");
     const t = todayIso(), nm = nowMin();
-    const usable = this.slots.filter(s => s.date > t || (s.date===t && toMin(s.time) > nm));
-    if(!usable.length){ $("slotList").innerHTML = `<p class="muted">No interview times are open for this position right now. Please check back soon or contact us.</p>`; $("bookBtn").disabled=true; return; }
-    $("bookBtn").disabled=false;
-    const len = usable[0].length || 30; $("slotLead").textContent = `Each slot is ${len} minutes. Times shown are Central (Texas). Crossed-out times are already taken.`;
+    const usable = this.slots.filter(s => (s.date > t || (s.date===t && toMin(s.time) > nm)) && s.id!==this.data.slotId);
+    if(!usable.length){ list.innerHTML = `<p class="muted">No ${re?"other ":""}interview times are open for this position right now. Please check back soon or contact us.</p>`; btn.disabled=true; return; }
+    btn.disabled=false;
+    const len = usable[0].length || 30; if(!re) lead.textContent = `Each slot is ${len} minutes. Times shown are Central (Texas). Crossed-out times are already taken.`;
     const by = {}; usable.forEach(s => (by[s.date]=by[s.date]||[]).push(s));
-    $("slotList").innerHTML = Object.keys(by).sort().map(d => `<div class="day"><h3>${dateLabel(d)}</h3><div class="times">${by[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s =>
+    list.innerHTML = Object.keys(by).sort().map(d => `<div class="day"><h3>${dateLabel(d)}</h3><div class="times">${by[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s =>
       s.booked ? `<button class="slot taken" disabled>${ampm(s.time)}<small>unavailable</small></button>`
-               : `<button class="slot ${this.data.slotId===s.id?'sel':''}" onclick="C.pickSlot('${s.id}')">${ampm(s.time)}</button>`).join("")}</div></div>`).join("");
+               : `<button class="slot ${this.pick===s.id?'sel':''}" onclick="C.pickSlot('${s.id}')">${ampm(s.time)}</button>`).join("")}</div></div>`).join("");
   },
-  pickSlot(id){ this.data.slotId=id; this.renderSlots(); $("e4").textContent=""; },
+  pick:"",
+  pickSlot(id){ this.pick=id; this.renderSlots(); $("e4").textContent=""; $("e7").textContent=""; },
 
+  slotById(id){ return this.slots.find(s=>s.id===id); },
+  fail(el,btn,label,e){
+    btn.disabled=false; btn.textContent=label;
+    const m = { used:"This link has already been used to book a time.", taken:"Sorry \u2014 someone just took that time. Please pick another.", gone:"That time is no longer available. Please pick another." }[e.message];
+    $(el).textContent = m || "Couldn't save. Please try again."; if(!m) console.error(e);
+    if(m && e.message!=="used"){ this.pick=""; this.renderSlots(); }
+  },
+
+  // First booking: create the response (private doc) first, then claim the slot and
+  // mark the token used. The slot only ever stores the response id, never the token.
   async submit(){
-    if(!this.data.slotId){ $("e4").textContent="Pick a time first."; return; }
+    if(!this.pick){ $("e4").textContent="Pick a time first."; return; }
     const btn=$("bookBtn"); btn.disabled=true; btn.textContent="Booking\u2026";
-    const slotRef=db.collection("slots").doc(this.data.slotId), candRef=db.collection("candidates").doc(this.data.candidateId), respRef=db.collection("responses").doc();
+    const slot=this.slotById(this.pick); if(!slot||slot.booked){ this.fail("e4",btn,"Book this time",new Error(slot?"taken":"gone")); return; }
     const who=this.data.firstName+" "+this.data.lastName;
     try{
-      let slotData;
-      await db.runTransaction(async tx => {
-        const [s,c] = await Promise.all([tx.get(slotRef), tx.get(candRef)]);
-        if(!c.exists || c.data().used) throw new Error("used");
-        if(!s.exists) throw new Error("gone");
-        if(s.data().booked) throw new Error("taken");
-        slotData = s.data();
-        tx.set(respRef, { candidateId:this.data.candidateId, firstName:this.data.firstName, lastName:this.data.lastName, phone:this.data.phone,
-          job:this.data.job, jobTitle:this.data.jobTitle, answers:this.data.answers, slotId:this.data.slotId, slotDate:slotData.date, slotTime:slotData.time,
-          slotLength:slotData.length||30, staff:slotData.staff||[], createdAt:TS() });
-        tx.update(slotRef, { booked:true, bookedBy:who, responseId:respRef.id, candidateId:this.data.candidateId, bookedAt:TS() });
-        tx.update(candRef, { used:true, responseId:respRef.id, usedAt:TS() });
-      });
-      this.booked = { ...slotData, who };
-      $("doneSlot").textContent = dateLabel(slotData.date)+" at "+ampm(slotData.time)+" Central";
-      $("doneWho").textContent = who+" \u00b7 "+this.data.jobTitle;
+      let respRef;
+      if(this.data.responseId){ respRef=db.collection("responses").doc(this.data.responseId); await respRef.update({ slotId:slot.id, slotDate:slot.date, slotTime:slot.time, slotLength:slot.length||30, staff:slot.staff||[], updatedAt:TS() }); }
+      else{
+        respRef=db.collection("responses").doc();
+        await respRef.set({ candidateId:this.data.candidateId, firstName:this.data.firstName, lastName:this.data.lastName, phone:this.data.phone, job:this.data.job, jobTitle:this.data.jobTitle,
+          answers:this.data.answers, additions:[], slotId:slot.id, slotDate:slot.date, slotTime:slot.time, slotLength:slot.length||30, staff:slot.staff||[], createdAt:TS() });
+        this.data.responseId=respRef.id;
+      }
+      const b=db.batch();
+      b.update(db.collection("slots").doc(slot.id), { booked:true, responseId:respRef.id, bookedAt:TS() });
+      b.update(db.collection("candidates").doc(this.data.candidateId), { used:true, responseId:respRef.id, slotId:slot.id, slotDate:slot.date, slotTime:slot.time, slotLength:slot.length||30, answers:this.data.answers, additions:[], usedAt:TS() });
+      await b.commit();
+      this.data.slotId=slot.id; this.booked={ date:slot.date, time:slot.time, length:slot.length||30, who };
+      $("doneSlot").textContent=dateLabel(slot.date)+" at "+ampm(slot.time)+" Central"; $("doneWho").textContent=who+" \u00b7 "+this.data.jobTitle;
       this.show(5);
-    }catch(e){
-      btn.disabled=false; btn.textContent="Book this time";
-      const m = { used:"This link has already been used to book a time. Contact us if you need to change it.", taken:"Sorry \u2014 someone just took that time. Please pick another.", gone:"That time is no longer available. Please pick another." }[e.message];
-      $("e4").textContent = m || "Couldn't save your booking. Please try again."; if(!m) console.error(e);
-      if(m && e.message!=="used"){ this.data.slotId=""; this.renderSlots(); }
-    }
+    }catch(e){ this.fail("e4",btn,"Book this time",new Error(/permission|denied/i.test(e.message)?"taken":e.message)); }
   },
+
+  // Reschedule: point the response at the new slot first (proves ownership),
+  // then claim the new slot and release the old one in one batch.
+  startReschedule(){ this.pick=""; this.show(7); },
+  async reschedule(){
+    if(!this.pick){ $("e7").textContent="Pick a new time first."; return; }
+    const btn=$("rebookBtn"); btn.disabled=true; btn.textContent="Moving\u2026";
+    const slot=this.slotById(this.pick), old=this.data.slotId, respRef=db.collection("responses").doc(this.data.responseId);
+    if(!slot||slot.booked){ this.fail("e7",btn,"Move to this time",new Error(slot?"taken":"gone")); return; }
+    const prev={ slotId:old, slotDate:this.booked.date, slotTime:this.booked.time, slotLength:this.booked.length||30 };
+    try{
+      await respRef.update({ slotId:slot.id, slotDate:slot.date, slotTime:slot.time, slotLength:slot.length||30, staff:slot.staff||[], updatedAt:TS() });
+      try{
+        const b=db.batch();
+        b.update(db.collection("slots").doc(slot.id), { booked:true, responseId:this.data.responseId, bookedAt:TS() });
+        if(old) b.update(db.collection("slots").doc(old), { booked:false, responseId:null, bookedAt:null });
+        b.update(db.collection("candidates").doc(this.data.candidateId), { slotId:slot.id, slotDate:slot.date, slotTime:slot.time, slotLength:slot.length||30, updatedAt:TS() });
+        await b.commit();
+      }catch(e2){ await respRef.update({ ...prev, staff:(this.slotById(old)||{}).staff||[], updatedAt:TS() }).catch(()=>{}); throw new Error("taken"); }
+      this.data.slotId=slot.id; this.booked={ ...this.booked, date:slot.date, time:slot.time, length:slot.length||30 };
+      btn.disabled=false; btn.textContent="Move to this time"; this.show(6);
+    }catch(e){ this.fail("e7",btn,"Move to this time",e); }
+  },
+
+  // Returning view: answers are read-only; notes can only be appended.
+  renderReturn(){
+    const b=this.booked; $("retSlot").textContent=dateLabel(b.date)+" at "+ampm(b.time)+" Central"; $("retWho").textContent=b.who+" \u00b7 "+this.data.jobTitle;
+    const adds=(this.cand&&this.cand.additions)||[]; const answers=this.data.answers||{};
+    const ids=Object.keys(answers);
+    $("retAnswers").innerHTML = ids.length ? ids.map(qid=>{ const a=answers[qid]; const mine=adds.filter(x=>x.qid===qid);
+      return `<div class="ret"><div class="rq">${esc(a.question)}</div><div class="ra">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div>
+        ${mine.map(x=>`<div class="add">${esc(x.text)}<small>Added ${x.at?new Date(x.at).toLocaleString():""}</small></div>`).join("")}
+        <div class="addrow"><input id="add_${qid}" placeholder="Add a note to this answer\u2026"><button class="small" onclick="C.addNote('${qid}')">Add</button></div></div>`; }).join("")
+      : `<p class="muted">You weren't asked any questions for this position.</p>`;
+  },
+  async addNote(qid){
+    const inp=$("add_"+qid); const text=(inp.value||"").trim(); if(!text) return;
+    const entry={ qid, text, at:Date.now() }; const adds=[...((this.cand&&this.cand.additions)||[]), entry];
+    try{
+      const b=db.batch();
+      b.update(db.collection("candidates").doc(this.data.candidateId), { additions:adds, updatedAt:TS() });
+      b.update(db.collection("responses").doc(this.data.responseId), { additions:adds, updatedAt:TS() });
+      await b.commit();
+      this.cand.additions=adds; inp.value=""; this.renderReturn();
+    }catch(e){ $("e6").textContent="Couldn't save your note. Please try again."; console.error(e); }
+  },
+  showReturn(){ this.cand={ ...(this.cand||{}), additions:[] }; this.show(6); },
   downloadIcs(){
     if(!this.booked) return; const b=this.booked;
-    download("dossani-interview.ics", buildIcs([{ uid:"cand-"+b.date+b.time, date:b.date, time:b.time, len:b.length||30, summary:"Interview \u2014 Dossani Paradise ("+this.data.jobTitle+")", description:"Phone interview with Dossani Paradise. We'll call you at "+this.data.phone+"." }]), "text/calendar");
+    download("dossani-interview.ics", buildIcs([{ uid:"cand-"+this.data.candidateId.slice(0,12), date:b.date, time:b.time, len:b.length||30, summary:"Interview \u2014 Dossani Paradise ("+this.data.jobTitle+")", description:"Phone interview with Dossani Paradise. We'll call you at "+this.data.phone+"." }]), "text/calendar");
   }
 };
 
@@ -581,7 +661,7 @@ const A = {
     push(db.collection("staff").onSnapshot(s => { this.staff = s.docs.map(d => ({id:d.id,...d.data()})); this.renderStaff(); this.fillStaffPick(); this.fillStaffSelects(); this.renderHome(); }));
     push(db.collection("candidates").onSnapshot(s => { this.candidates = s.docs.map(d => ({id:d.id,...d.data()})); this.renderCandidates(); this.renderSetup(); this.renderHome(); }, e => $("candAdmin").innerHTML=`<p class="err">Can't read candidates: ${esc(e.message)}</p>`));
     push(db.collection("slots").onSnapshot(s => { this.slots = s.docs.map(d => ({id:d.id,...d.data()})); this.renderSlots(); this.renderInterviews(); this.renderSetup(); }));
-    push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id,...d.data()})); this.renderInterviews(); this.renderHome(); }, e => $("intList").innerHTML=`<p class="err">Can't read responses: ${esc(e.message)}</p>`));
+    push(db.collection("responses").orderBy("createdAt","desc").onSnapshot(s => { this.responses = s.docs.map(d => ({id:d.id,...d.data()})); this.renderInterviews(); this.renderHome(); this.renderSlots(); }, e => $("intList").innerHTML=`<p class="err">Can't read responses: ${esc(e.message)}</p>`));
   },
   unsubscribe(){ this.unsubs.forEach(u => u()); this.unsubs=[]; },
 
@@ -705,7 +785,7 @@ const A = {
     await db.collection("candidates").doc(id).update({ resumeUrl:null, resumeName:null, resumeHandle:null, resumeSize:null });
   },
   async removeCandidate(id){ const c=this.candidates.find(x=>x.id===id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; await db.collection("candidates").doc(id).delete(); },
-  async resetCandidate(id){ if(!confirm("Let this person book again? Their earlier response is kept.")) return; await db.collection("candidates").doc(id).update({ used:false, responseId:null, usedAt:null }); },
+  async resetCandidate(id){ if(!confirm("Let this person book again? Their earlier response is kept.")) return; await db.collection("candidates").doc(id).update({ used:false, responseId:null, slotId:null, slotDate:null, slotTime:null, answers:null, additions:[], usedAt:null }); },
   renderCandidates(){
     const q=($("candSearch").value||"").toLowerCase(), jf=$("candFilterJob").value;
     const list=this.candidates.filter(c => (!jf||c.job===jf) && (!q||(c.firstName+" "+c.lastName+" "+c.phone).toLowerCase().includes(q))).sort((a,b)=>(a.lastName+a.firstName).localeCompare(b.lastName+b.firstName));
@@ -749,7 +829,7 @@ const A = {
     for(let d=new Date(fy,fm-1,fd); d<=new Date(ty,tm-1,td); d.setDate(d.getDate()+1)){
       if(from!==to && !dows.includes(d.getDay())) continue;
       const iso=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-      for(let m=toMin(start); m+len<=toMin(end); m+=len){ const time=fromMin(m), id=job+"_"+iso+"_"+time.replace(":",""); if(!existing.has(id)) list.push({ id, job, jobTitle:this.jobTitle(job), date:iso, time, length:len, booked:false, bookedBy:null, responseId:null, candidateId:null }); }
+      for(let m=toMin(start); m+len<=toMin(end); m+=len){ const time=fromMin(m), id=job+"_"+iso+"_"+time.replace(":",""); if(!existing.has(id)) list.push({ id, job, jobTitle:this.jobTitle(job), date:iso, time, length:len, booked:false, responseId:null }); }
     }
     return { job, list, err:"" };
   },
@@ -769,8 +849,9 @@ const A = {
     await db.collection("slots").doc(id).update({ staff });
     if(s.responseId){ try{ await db.collection("responses").doc(s.responseId).update({ staff }); }catch(e){} }
   },
-  async deleteSlot(id){ const s=this.slots.find(x=>x.id===id); if(s&&s.booked&&!confirm(`This slot is booked by ${s.bookedBy}. Delete anyway? Their response stays.`)) return; await db.collection("slots").doc(id).delete(); },
-  async unbook(id){ if(!confirm("Free this slot up? The candidate's response is kept.")) return; await db.collection("slots").doc(id).update({ booked:false, bookedBy:null, responseId:null, candidateId:null, bookedAt:null }); },
+  slotName(s){ const r=this.responses.find(x=>x.id===s.responseId); return r ? r.firstName+" "+r.lastName : "(booked)"; },
+  async deleteSlot(id){ const s=this.slots.find(x=>x.id===id); if(s&&s.booked&&!confirm(`This slot is booked by ${this.slotName(s)}. Delete anyway? Their response stays.`)) return; await db.collection("slots").doc(id).delete(); },
+  async unbook(id){ if(!confirm("Free this slot up? The candidate's response is kept.")) return; await db.collection("slots").doc(id).update({ booked:false, responseId:null, bookedAt:null }); },
   async batchDelete(list){ for(let i=0;i<list.length;i+=400){ const b=db.batch(); list.slice(i,i+400).forEach(s=>b.delete(db.collection("slots").doc(s.id))); await b.commit(); } },
   async deleteAllOpen(){ const jf=$("slotFilterJob").value; const open=this.slots.filter(s=>!s.booked&&(!jf||s.job===jf)); if(!open.length) return; if(!confirm(`Delete ${open.length} open slot(s)${jf?" for this posting":""}? Booked ones are kept.`)) return; await this.batchDelete(open); },
   async deleteOpenPast(){ const t=todayIso(); const old=this.slots.filter(s=>!s.booked&&s.date<t); if(!old.length){ $("slotSummary").textContent="No past open slots."; return; } await this.batchDelete(old); },
@@ -783,7 +864,7 @@ const A = {
     $("slotAdmin").innerHTML=Object.keys(by).sort().map(d=>`<details ${d>=t?"open":""} class="resp"><summary><strong>${dateLabel(d)}</strong><span class="muted">${by[d].filter(s=>s.booked).length} of ${by[d].length} booked</span></summary>
       <div class="body"><table><thead><tr><th>Time</th><th>Posting</th><th>Interviewers</th><th>Status</th><th>Candidate</th><th></th></tr></thead><tbody>${by[d].sort((a,b)=>a.time.localeCompare(b.time)).map(s=>`
         <tr><td>${ampm(s.time)}</td><td><span class="pill grey">${esc(this.jobTitle(s.job))}</span></td><td>${(s.staff||[]).map(esc).join(", ")||'<span class="muted">\u2014</span>'} <button class="quiet small" onclick="A.setSlotStaff('${s.id}')">Edit</button></td>
-        <td>${s.booked?'<span class="pill booked">Booked</span>':'<span class="pill open">Open</span>'}</td><td>${s.booked?esc(s.bookedBy):'<span class="muted">\u2014</span>'}</td>
+        <td>${s.booked?'<span class="pill booked">Booked</span>':'<span class="pill open">Open</span>'}</td><td>${s.booked?esc(this.slotName(s)):'<span class="muted">\u2014</span>'}</td>
         <td style="text-align:right;white-space:nowrap">${s.booked?`<button class="quiet small" onclick="A.unbook('${s.id}')">Free up</button> `:''}<button class="danger small" onclick="A.deleteSlot('${s.id}')">Delete</button></td></tr>`).join("")}</tbody></table></div></details>`).join("");
   },
 
@@ -794,6 +875,8 @@ const A = {
       .sort((a,b)=>(a.slotDate+a.slotTime).localeCompare(b.slotDate+b.slotTime));
   },
   candFor(r){ return this.candidates.find(c=>c.id===r.candidateId); },
+  confirmed(r){ const s=this.slots.find(x=>x.id===r.slotId); return !!(s && s.booked && s.responseId===r.id); },
+  addsFor(r,qid){ return (r.additions||[]).filter(a=>a.qid===qid); },
   renderInterviews(){
     $("nInt").textContent=this.responses.length;
     const list=this.interviewList(); const who=$("intWho").value;
@@ -802,8 +885,9 @@ const A = {
     const t=todayIso();
     $("intList").innerHTML=list.map(r=>{
       const c=this.candFor(r); const past=r.slotDate<t;
-      const ans=Object.values(r.answers||{}).map(a=>`<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||'<span class="muted">(blank)</span>')}</div></div>`).join("")||`<p class="muted">No questions were asked.</p>`;
-      return `<details class="resp" ${past?'':''}><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="pill booked">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}</span><span class="pill grey">${esc(this.jobTitle(r.job))}</span><span class="muted">${(r.staff||[]).map(esc).join(", ")||"no interviewer assigned"}</span></summary>
+      const ans=Object.entries(r.answers||{}).map(([qid,a])=>`<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||'<span class="muted">(blank)</span>')}</div>${this.addsFor(r,qid).map(x=>`<div class="v" style="border-left:3px solid var(--green);padding-left:10px;margin-top:6px;font-size:14px">${esc(x.text)} <span class="muted">\u2014 added ${x.at?new Date(x.at).toLocaleDateString():""}</span></div>`).join("")}</div>`).join("")||`<p class="muted">No questions were asked.</p>`;
+      const ok=this.confirmed(r);
+      return `<details class="resp"><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="pill ${ok?'booked':'grey'}">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}${ok?"":" \u00b7 unconfirmed"}</span><span class="pill grey">${esc(this.jobTitle(r.job))}</span><span class="muted">${(r.staff||[]).map(esc).join(", ")||"no interviewer assigned"}</span></summary>
         <div class="body"><p class="muted" style="margin:10px 0 0">${esc(r.phone||"")}</p>${ans}
         <div class="row" style="margin-top:12px"><button class="small" onclick="A.printResponse('${r.id}')">Print interview packet</button>${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Open resume</a>`:`<span class="muted">No resume attached</span>`}${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep questions${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Add to calendar</button><button class="danger small" onclick="A.deleteResponse('${r.id}')">Delete</button></div></div></details>`;
     }).join("");
@@ -811,8 +895,8 @@ const A = {
   async deleteResponse(id){
     const r=this.responses.find(x=>x.id===id); if(!confirm("Delete this booking? The slot is freed and the candidate can book again.")) return;
     const b=db.batch(); b.delete(db.collection("responses").doc(id));
-    if(r.slotId) b.update(db.collection("slots").doc(r.slotId), { booked:false, bookedBy:null, responseId:null, candidateId:null, bookedAt:null });
-    if(r.candidateId) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, usedAt:null });
+    if(r.slotId) b.update(db.collection("slots").doc(r.slotId), { booked:false, responseId:null, bookedAt:null });
+    if(r.candidateId) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, slotId:null, slotDate:null, slotTime:null, answers:null, additions:[], usedAt:null });
     try{ await b.commit(); }catch(e){ await db.collection("responses").doc(id).delete(); }
   },
   exportIcs(onlyId){
@@ -835,7 +919,7 @@ const A = {
   },
   printResponse(id){
     const r=this.responses.find(x=>x.id===id); if(!r) return; const c=this.candFor(r);
-    const ans=Object.values(r.answers||{}).map(a=>`<div class="a"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div></div>`).join("")||"<p><em>No questions were asked.</em></p>";
+    const ans=Object.entries(r.answers||{}).map(([qid,a])=>`<div class="a"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||"<em>(blank)</em>")}</div>${this.addsFor(r,qid).map(x=>`<div class="v addn">${esc(x.text)} <span class="k">\u2014 added later${x.at?", "+new Date(x.at).toLocaleDateString():""}</span></div>`).join("")}</div>`).join("")||"<p><em>No questions were asked.</em></p>";
     const lines = n => `<table class="lines">${Array.from({length:n},()=>'<tr><td>&nbsp;</td></tr>').join("")}</table>`;
     const gq = c ? this.iqFor(c) : this.iq.filter(q=>!q.job || q.job===r.job);
     const cq = this.cqNorm(c && c.interviewQuestions);
@@ -853,7 +937,7 @@ const A = {
       h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 10px;color:#1f5e4a}.m{color:#6b7280;margin:0 0 6px}
       .box{border:1px solid #dfdcd4;border-radius:8px;margin:16px 0;border-collapse:collapse;width:100%}.box td{padding:8px 14px;width:50%;vertical-align:top}
       .lines{width:100%;border-collapse:collapse;margin-left:32px;width:calc(100% - 32px)}.lines td{border-bottom:1px solid #cfd4cf;height:26px;padding:0}
-      .a{margin:14px 0}.k{color:#6b7280;font-size:13px}.v{white-space:pre-wrap;margin-top:2px}
+      .a{margin:14px 0}.k{color:#6b7280;font-size:13px}.v{white-space:pre-wrap;margin-top:2px}.addn{border-left:3px solid #1f5e4a;padding-left:10px;margin-top:6px;font-size:14px}
       .pb{page-break-before:always}iframe{width:100%;height:95vh;border:1px solid #dfdcd4}
       h3{font-size:15px;margin:26px 0 8px;color:#6b7280;text-transform:uppercase;letter-spacing:.04em}
       .iq{margin:0 0 18px;page-break-inside:avoid}.iqt{font-weight:600}.num{color:#1f5e4a;display:inline-block;min-width:26px}
