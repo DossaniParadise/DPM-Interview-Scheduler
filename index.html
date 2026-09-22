@@ -56,6 +56,7 @@
   .slot small{display:block;font-weight:500;font-size:11px;text-decoration:none}
   .confirm-box{background:var(--green-tint);border:1px solid #bfd8cd;border-radius:var(--r);padding:18px 20px;margin:16px 0}
   .confirm-box strong{display:block;font-size:22px}
+  .letter{font-size:17px;line-height:1.6}.letter p{margin:0 0 14px}.letter ul{margin:0 0 14px 22px;padding:0}.letter li{margin:3px 0}
   .ret{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;background:var(--paper)}
   .ret .rq{font-size:14px;color:var(--ink-3)}.ret .ra{white-space:pre-wrap;margin:4px 0 8px}
   .ret .add{border-left:3px solid var(--green);padding:6px 10px;margin:6px 0;background:var(--green-tint);border-radius:0 8px 8px 0;white-space:pre-wrap;font-size:15px}
@@ -163,7 +164,7 @@
   <section id="s3" class="card" style="display:none">
     <div class="jobtag" id="jobTag3"></div>
     <h1>A few questions first.</h1>
-    <p class="lead">Short answers are fine. There are no trick questions.</p>
+
     <div id="qList"></div>
     <div class="err" id="e3"></div>
     <div class="nav"><button class="quiet" onclick="C.show(1)">Back</button><button onclick="C.next(3)">Continue</button></div>
@@ -179,11 +180,10 @@
   </section>
 
   <section id="s5" class="card" style="display:none">
-    <h1>You're booked.</h1>
-    <p class="lead">We'll call you at the number on your application. Here's your time:</p>
     <div class="confirm-box"><strong id="doneSlot"></strong><span id="doneWho"></span></div>
-    <div class="row"><button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button><button class="quiet" onclick="C.showReturn()">View my answers</button></div>
-    <p class="muted" style="margin-top:18px">Need to change it? Come back to this page any time, enter your name and last 4 digits, and you can pick a new time or add to your answers.</p>
+    <div class="letter" id="letter"></div>
+    <div class="row" style="margin-top:22px"><button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button><button class="quiet" onclick="C.showReturn()">View my answers</button></div>
+    <p class="muted" style="margin-top:18px">Need to change your time? Come back to this page, enter your name and last 4 digits, and you can pick a new one.</p>
   </section>
 
   <!-- returning candidate -->
@@ -192,7 +192,7 @@
     <h1>Welcome back.</h1>
     <p class="lead">Your interview is booked. You can change the time or add to your answers below.</p>
     <div class="confirm-box"><strong id="retSlot"></strong><span id="retWho"></span></div>
-    <div class="row" style="margin-bottom:26px"><button onclick="C.startReschedule()">Change my time</button><button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button></div>
+    <div class="row" style="margin-bottom:26px"><button onclick="C.startReschedule()">Change my time</button><button class="quiet" onclick="C.downloadIcs()">Add to my calendar</button><button class="quiet" onclick="C.show(5)">Directions &amp; details</button></div>
     <h2 style="margin-bottom:4px">Your answers</h2>
     <p class="muted" style="margin:0 0 14px">What you submitted can't be changed, but you can add a note under any answer.</p>
     <div id="retAnswers"></div>
@@ -347,7 +347,8 @@
       <div class="card" style="margin-bottom:22px">
         <h2>Staff</h2>
         <p class="muted" style="margin:0 0 12px">Anyone who signs in is added here automatically. You can also add someone ahead of time so they can be assigned to slots before their first sign-in. Sign-in accounts themselves are created in the Firebase console.</p>
-        <div class="grid2"><input id="stName" placeholder="Name"><input id="stEmail" type="email" placeholder="Email"></div>
+        <div class="grid3"><input id="stName" placeholder="Name"><input id="stTitle" placeholder="Title shown to candidates (e.g. IT)"><input id="stEmail" type="email" placeholder="Email"></div>
+        <p class="muted" style="margin:8px 0 0">Name and title appear in the candidate's confirmation letter when this person is assigned to their slot. Emails are never shown to candidates.</p>
         <div class="row" style="margin-top:10px"><button onclick="A.addStaff()">Add staff member</button><span class="status" id="stStatus"></span></div>
       </div>
       <div id="staffAdmin"></div>
@@ -467,6 +468,7 @@ const C = {
     const map = {1:"Step 1 of 3",3:"Step 2 of 3",4:"Step 3 of 3"}; $("stepLabel").textContent = map[n] || "";
     if(n===3){ $("jobTag3").textContent = this.data.jobTitle; this.renderQuestions(); }
     if(n===4){ $("jobTag4").textContent = this.data.jobTitle; this.watchSlots(); this.renderSlots(); }
+    if(n===5) this.renderLetter();
     if(n===6){ $("jobTag6").textContent = this.data.jobTitle; this.renderReturn(); }
     if(n===7){ $("jobTag7").textContent = this.data.jobTitle; this.watchSlots(); this.renderSlots(); }
     window.scrollTo({top:0});
@@ -620,6 +622,31 @@ const C = {
       await b.commit();
       this.cand.additions=adds; inp.value=""; this.renderReturn();
     }catch(e){ $("e6").textContent="Couldn't save your note. Please try again."; console.error(e); }
+  },
+  // Staff names for the letter come from the staff directory (public read of names only).
+  staffDir:null,
+  async loadStaffDir(){
+    if(this.staffDir) return this.staffDir;
+    try{ const d=await db.doc("config/staffDirectory").get(); this.staffDir=(d.exists&&d.data().list)||[]; }catch(e){ this.staffDir=[]; }
+    return this.staffDir;
+  },
+  async renderLetter(){
+    const b=this.booked; if(!b) return;
+    $("doneSlot").textContent=dateLabel(b.date)+" at "+ampm(b.time)+" Central"; $("doneWho").textContent=this.data.firstName+" "+this.data.lastName+" \u00b7 "+this.data.jobTitle;
+    const dir=await this.loadStaffDir();
+    const slot=this.slotById(this.data.slotId); const emails=(slot&&slot.staff)||[];
+    const people=emails.map(e=>dir.find(x=>(x.email||"").toLowerCase()===e.toLowerCase())).filter(Boolean);
+    const list=people.length?`<p>During your visit, you'll have the opportunity to meet with:</p><ul>${people.map(x=>`<li>${esc(x.name)}${x.title?", "+esc(x.title):""}</li>`).join("")}</ul>`:"";
+    const len=b.length||30;
+    $("letter").innerHTML=`
+      <p>Hello ${esc(this.data.firstName)},</p>
+      <p>We're looking forward to meeting you on <strong>${dateLabel(b.date)}</strong> at <strong>${ampm(b.time)}</strong>!</p>
+      <p>When you arrive, you'll find the Dossani Paradise Management Office in Suite 100. The easiest entrance is on the Northwest Highway side of the building, where you'll see the Dossani Paradise sign above the door.</p>
+      <p>If no one is at the front desk when you arrive, simply ring the bell and let them know you're here to meet with us.</p>
+      <p>We've reserved ${len===30?"a half hour":len+" minutes"} for your interview to allow plenty of time for conversation and questions, although we expect the interview itself will take approximately ${Math.max(10,Math.round(len*2/3/5)*5)} minutes.</p>
+      ${list}
+      <p>We're excited to learn more about you and appreciate your interest in joining the Dossani Paradise team.</p>
+      <p>Safe travels, and we'll see you then!</p>`;
   },
   showReturn(){ this.cand={ ...(this.cand||{}), additions:[] }; this.show(6); },
   downloadIcs(){
@@ -808,15 +835,25 @@ const A = {
     $("gStaff").innerHTML = this.staff.length ? this.staff.map(s => `<label><input type="checkbox" value="${esc(s.email)}" ${this.me&&s.email===this.me.email?'checked':''}>${esc(s.name||s.email)}</label>`).join("") : `<span class="muted">No staff yet \u2014 add them on the Staff tab.</span>`;
   },
   async addStaff(){
-    const name=$("stName").value.trim(), email=$("stEmail").value.trim().toLowerCase();
+    const name=$("stName").value.trim(), title=$("stTitle").value.trim(), email=$("stEmail").value.trim().toLowerCase();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $("stStatus").textContent="Enter a valid email."; return; }
-    if(this.staff.some(s=>(s.email||"").toLowerCase()===email)){ $("stStatus").textContent="Already listed."; return; }
-    await db.collection("staff").doc("pre_"+sha256(email).slice(0,20)).set({ email, name:name||email.split("@")[0], addedAt:TS() });
-    $("stName").value=""; $("stEmail").value=""; $("stStatus").textContent="Added.";
+    const ex=this.staff.find(s=>(s.email||"").toLowerCase()===email);
+    if(ex){ await db.collection("staff").doc(ex.id).set({ name:name||ex.name, title }, { merge:true }); $("stStatus").textContent="Updated."; }
+    else { await db.collection("staff").doc("pre_"+sha256(email).slice(0,20)).set({ email, name:name||email.split("@")[0], title, addedAt:TS() }); $("stStatus").textContent="Added."; }
+    $("stName").value=""; $("stTitle").value=""; $("stEmail").value="";
   },
   async removeStaff(id){ const s=this.staff.find(x=>x.id===id); if(!confirm(`Remove ${s.name||s.email} from the staff list? This doesn't delete their sign-in.`)) return; await db.collection("staff").doc(id).delete(); },
   renderStaff(){
-    $("staffAdmin").innerHTML = this.staff.length ? this.staff.map(s=>`<div class="list-item"><span class="grow"><strong>${esc(s.name||"")}</strong> <span class="muted">${esc(s.email)}</span>${s.uid?'':' <span class="pill grey">not signed in yet</span>'}</span><button class="danger small" onclick="A.removeStaff('${s.id}')">Remove</button></div>`).join("") : `<p class="muted">No staff listed yet.</p>`;
+    $("staffAdmin").innerHTML = this.staff.length ? this.staff.map(s=>`<div class="list-item"><span class="grow"><strong>${esc(s.name||"")}</strong>${s.title?` <span class="pill grey">${esc(s.title)}</span>`:""} <span class="muted">${esc(s.email)}</span>${s.uid?'':' <span class="pill grey">not signed in yet</span>'}</span><button class="quiet small" onclick="A.editStaff('${s.id}')">Edit</button><button class="danger small" onclick="A.removeStaff('${s.id}')">Remove</button></div>`).join("") : `<p class="muted">No staff listed yet.</p>`;
+    this.publishStaffDir();
+  },
+  editStaff(id){ const s=this.staff.find(x=>x.id===id); if(!s) return; $("stName").value=s.name||""; $("stTitle").value=s.title||""; $("stEmail").value=s.email||""; $("stName").focus(); },
+  // Candidates can't read the staff collection, so keep a name+title copy in config (public read).
+  _dirKey:"",
+  async publishStaffDir(){
+    const list=this.staff.map(s=>({ email:(s.email||"").toLowerCase(), name:s.name||"", title:s.title||"" })).sort((a,b)=>a.email.localeCompare(b.email));
+    const key=JSON.stringify(list); if(key===this._dirKey) return; this._dirKey=key;
+    try{ await db.doc("config/staffDirectory").set({ list, updatedAt:TS() }); }catch(e){ console.warn(e); }
   },
 
   /* ----- slots ----- */
