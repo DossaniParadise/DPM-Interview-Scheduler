@@ -208,7 +208,6 @@
     <div class="nav"><button class="quiet" onclick="C.show(6)">Keep my current time</button><button id="rebookBtn" onclick="C.reschedule()">Move to this time</button></div>
   </section>
 
-  <p class="muted" style="text-align:center;margin-top:40px;font-size:13px"><a href="#/admin" style="color:var(--ink-3)">Staff sign-in</a></p>
 </div>
 
 <!-- ================= ADMIN ================= -->
@@ -224,7 +223,6 @@
     <div class="field"><label class="f">Password</label><input id="aPass" type="password" autocomplete="current-password"></div>
     <div class="err" id="aErr"></div>
     <button style="width:100%" onclick="A.login()">Sign in</button>
-    <p class="muted" style="margin-top:14px">Accounts are created in the Firebase console under Authentication.</p>
   </div>
 
   <div id="adminApp" style="display:none">
@@ -349,7 +347,7 @@
         <p class="muted" style="margin:0 0 12px">Anyone who signs in is added here automatically. You can also add someone ahead of time so they can be assigned to slots before their first sign-in. Sign-in accounts themselves are created in the Firebase console.</p>
         <div class="grid3"><input id="stName" placeholder="Name"><input id="stTitle" placeholder="Title shown to candidates (e.g. IT)"><input id="stEmail" type="email" placeholder="Email"></div>
         <p class="muted" style="margin:8px 0 0">Name and title appear in the candidate's confirmation letter when this person is assigned to their slot. Emails are never shown to candidates.</p>
-        <div class="row" style="margin-top:10px"><button onclick="A.addStaff()">Add staff member</button><span class="status" id="stStatus"></span></div>
+        <div class="row" style="margin-top:10px"><button onclick="A.addStaff()">Save staff member</button><button class="quiet" onclick="A.mergeDuplicates()">Merge duplicate emails</button><span class="status" id="stStatus"></span></div>
       </div>
       <div id="staffAdmin"></div>
     </div>
@@ -668,7 +666,17 @@ const A = {
       if(u){
         $("adminLogin").style.display="none"; $("adminApp").style.display="block"; $("whoami").textContent=u.email; $("logoutBtn").style.display="";
         // Auto-register this staff member so they can be assigned to slots.
-        try{ await db.collection("staff").doc(u.uid).set({ email:u.email, name:u.displayName||u.email.split("@")[0], uid:u.uid, lastSeen:TS() }, { merge:true }); }catch(e){ console.warn(e); }
+        try{
+          const email=(u.email||"").toLowerCase();
+          const byUid=await db.collection("staff").doc(u.uid).get();
+          if(byUid.exists){ await byUid.ref.set({ lastSeen:TS() }, { merge:true }); }
+          else{
+            // If this person was pre-added by email, attach the login to that record instead of creating a duplicate.
+            const q=await db.collection("staff").where("email","==",email).limit(1).get();
+            if(!q.empty){ await q.docs[0].ref.set({ uid:u.uid, lastSeen:TS() }, { merge:true }); }
+            else{ await db.collection("staff").doc(u.uid).set({ email, name:u.displayName||email.split("@")[0], title:"", uid:u.uid, lastSeen:TS() }); }
+          }
+        }catch(e){ console.warn(e); }
         this.subscribe(); this.tab("home");
       }else{ $("adminLogin").style.display="block"; $("adminApp").style.display="none"; $("whoami").textContent=""; $("logoutBtn").style.display="none"; this.unsubscribe(); }
     });
@@ -828,7 +836,7 @@ const A = {
   },
 
   /* ----- staff ----- */
-  staffName(email){ const st=this.staff.find(x=>(x.email||"").toLowerCase()===(email||"").toLowerCase()); return st ? (st.name||st.email) : (email||""); },
+  staffName(email){ const e=(email||"").toLowerCase(); const m=this.staff.filter(x=>(x.email||"").toLowerCase()===e); if(!m.length) return email||""; m.sort((a,b)=>((b.title?2:0)+(b.name?1:0))-((a.title?2:0)+(a.name?1:0))); return m[0].name||m[0].email; },
   staffOptions(sel){ return `<option value="">Anyone</option>`+this.staff.map(x=>`<option value="${esc(x.email)}" ${sel&&sel.toLowerCase()===(x.email||"").toLowerCase()?"selected":""}>${esc(x.name||x.email)}</option>`).join(""); },
   fillStaffSelects(){ const cur=$("iqWho").value; $("iqWho").innerHTML=this.staffOptions(cur); },
   fillStaffPick(){
@@ -844,14 +852,26 @@ const A = {
   },
   async removeStaff(id){ const s=this.staff.find(x=>x.id===id); if(!confirm(`Remove ${s.name||s.email} from the staff list? This doesn't delete their sign-in.`)) return; await db.collection("staff").doc(id).delete(); },
   renderStaff(){
-    $("staffAdmin").innerHTML = this.staff.length ? this.staff.map(s=>`<div class="list-item"><span class="grow"><strong>${esc(s.name||"")}</strong>${s.title?` <span class="pill grey">${esc(s.title)}</span>`:""} <span class="muted">${esc(s.email)}</span>${s.uid?'':' <span class="pill grey">not signed in yet</span>'}</span><button class="quiet small" onclick="A.editStaff('${s.id}')">Edit</button><button class="danger small" onclick="A.removeStaff('${s.id}')">Remove</button></div>`).join("") : `<p class="muted">No staff listed yet.</p>`;
+    const dupes=new Set(); const seen={}; this.staff.forEach(s=>{ const e=(s.email||"").toLowerCase(); if(seen[e]) dupes.add(e); seen[e]=1; });
+    $("staffAdmin").innerHTML = this.staff.length ? this.staff.map(s=>`<div class="list-item"><span class="grow"><strong>${esc(s.name||"")}</strong>${dupes.has((s.email||"").toLowerCase())?' <span class="pill" style="background:var(--amber-tint);color:var(--amber)">duplicate</span>':''}${s.title?` <span class="pill grey">${esc(s.title)}</span>`:""} <span class="muted">${esc(s.email)}</span>${s.uid?'':' <span class="pill grey">not signed in yet</span>'}</span><button class="quiet small" onclick="A.editStaff('${s.id}')">Edit</button><button class="danger small" onclick="A.removeStaff('${s.id}')">Remove</button></div>`).join("") : `<p class="muted">No staff listed yet.</p>`;
     this.publishStaffDir();
+  },
+  async mergeDuplicates(){
+    const groups={}; this.staff.forEach(s=>{ const e=(s.email||"").toLowerCase(); (groups[e]=groups[e]||[]).push(s); });
+    let merged=0;
+    for(const e in groups){ const g=groups[e]; if(g.length<2) continue;
+      const keep=g.find(x=>x.uid)||g[0]; const best=g.slice().sort((a,b)=>((b.title?2:0)+(b.name?1:0))-((a.title?2:0)+(a.name?1:0)))[0];
+      const b=db.batch(); b.set(db.collection("staff").doc(keep.id), { name:best.name||keep.name||"", title:best.title||keep.title||"", email:e, uid:keep.uid||null }, { merge:true });
+      g.filter(x=>x.id!==keep.id).forEach(x=>b.delete(db.collection("staff").doc(x.id))); await b.commit(); merged++; }
+    $("stStatus").textContent = merged ? `Merged ${merged} duplicate${merged===1?"":"s"}.` : "No duplicates found.";
   },
   editStaff(id){ const s=this.staff.find(x=>x.id===id); if(!s) return; $("stName").value=s.name||""; $("stTitle").value=s.title||""; $("stEmail").value=s.email||""; $("stName").focus(); },
   // Candidates can't read the staff collection, so keep a name+title copy in config (public read).
   _dirKey:"",
   async publishStaffDir(){
-    const list=this.staff.map(s=>({ email:(s.email||"").toLowerCase(), name:s.name||"", title:s.title||"" })).sort((a,b)=>a.email.localeCompare(b.email));
+    const byEmail={};
+    this.staff.forEach(s=>{ const e=(s.email||"").toLowerCase(); if(!e) return; const cur=byEmail[e]; const score=x=>(x.title?2:0)+(x.name&&!/^[a-z0-9._-]+$/i.test(x.name)?1:0); if(!cur||score(s)>score(cur)) byEmail[e]=s; });
+    const list=Object.values(byEmail).map(s=>({ email:(s.email||"").toLowerCase(), name:s.name||"", title:s.title||"" })).sort((a,b)=>a.email.localeCompare(b.email));
     const key=JSON.stringify(list); if(key===this._dirKey) return; this._dirKey=key;
     try{ await db.doc("config/staffDirectory").set({ list, updatedAt:TS() }); }catch(e){ console.warn(e); }
   },
