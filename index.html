@@ -262,7 +262,7 @@
         <div class="row" style="margin-top:10px"><button onclick="A.importCandidates()">Add to list</button><span class="status" id="cStatus"></span></div>
       </div>
       <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <span class="muted" id="candSummary"></span>
+        <div class="row"><span class="muted" id="candSummary"></span><button class="danger small" id="delSelBtn" onclick="A.deleteSelected()" style="display:none">Delete selected</button></div>
         <div class="row"><select id="candFilterJob" class="sel-inline" onchange="A.renderCandidates()"></select><input id="candSearch" placeholder="Search" oninput="A.renderCandidates()" style="width:180px;padding:8px 10px;font-size:15px"></div>
       </div>
       <div id="candAdmin"></div>
@@ -306,7 +306,7 @@
           <select id="intJob" class="sel-inline" onchange="A.renderInterviews()"></select>
           <span class="muted" id="intCount"></span>
         </div>
-        <div class="row"><button class="quiet small" onclick="A.exportIcs()">Export to Outlook / Teams (.ics)</button><button class="quiet small" onclick="A.exportCsv()">Export CSV</button></div>
+        <div class="row"><button class="quiet small" onclick="A.exportIcs()">Export to Outlook / Teams (.ics)</button><button class="quiet small" onclick="A.exportCsv()">Export CSV</button><button class="quiet small" id="orphanBtn" onclick="A.cleanOrphans()" style="display:none">Clean up leftovers</button></div>
       </div>
       <div id="intList"></div>
     </div>
@@ -819,7 +819,41 @@ const A = {
     if(!confirm("Detach this resume? The file stays in Filestack; only the link is removed.")) return;
     await db.collection("candidates").doc(id).update({ resumeUrl:null, resumeName:null, resumeHandle:null, resumeSize:null });
   },
-  async removeCandidate(id){ const c=this.candidates.find(x=>x.id===id); if(!confirm(`Remove ${c.firstName} ${c.lastName} from the approved list?`)) return; await db.collection("candidates").doc(id).delete(); },
+  // Removes the person entirely: their approved-list entry, every interview record, and frees any slot they held.
+  async deleteCandidateFully(ids, silent){
+    ids=[].concat(ids); if(!ids.length) return;
+    if(!silent){ const names=ids.map(id=>{ const c=this.candidates.find(x=>x.id===id); return c?c.firstName+" "+c.lastName:"(unknown)"; });
+      if(!confirm(`Delete ${ids.length===1?names[0]:ids.length+" candidates"} completely?\n\nThis removes them from the approved list, deletes their interview record and answers, and frees their time slot. This can't be undone.`)) return; }
+    const b=db.batch(); let n=0; const flush=async()=>{ if(n){ await b.commit(); } };
+    for(const id of ids){
+      this.responses.filter(r=>r.candidateId===id).forEach(r=>{ b.delete(db.collection("responses").doc(r.id)); n++;
+        const sl=this.slots.find(x=>x.responseId===r.id); if(sl) { b.update(db.collection("slots").doc(sl.id), { booked:false, responseId:null, bookedAt:null }); n++; } });
+      if(this.candidates.some(c=>c.id===id)){ b.delete(db.collection("candidates").doc(id)); n++; }
+    }
+    await flush();
+    const st=$("cStatus"); if(st) st.textContent=`Deleted ${ids.length} candidate${ids.length===1?"":"s"}.`;
+  },
+  removeCandidate(id){ this.deleteCandidateFully([id]); },
+  selectedCands(){ return [...document.querySelectorAll(".candsel:checked")].map(i=>i.value); },
+  toggleAllCand(on){ document.querySelectorAll(".candsel").forEach(i=>i.checked=on); this.updateSel(); },
+  updateSel(){ const n=this.selectedCands().length; const b=$("delSelBtn"); if(b){ b.style.display=n?"":"none"; b.textContent=`Delete ${n} selected`; } },
+  deleteSelected(){ this.deleteCandidateFully(this.selectedCands()); },
+  // Cancel just the booking: frees the slot, keeps the person on the list so they can book again.
+  async cancelBooking(id){
+    const r=this.responses.find(x=>x.id===id); if(!r) return;
+    if(!confirm(`Cancel ${r.firstName} ${r.lastName}'s booking? Their slot is freed and they can book again. Their answers are deleted.`)) return;
+    const b=db.batch(); b.delete(db.collection("responses").doc(id));
+    const sl=this.slots.find(x=>x.responseId===id); if(sl) b.update(db.collection("slots").doc(sl.id), { booked:false, responseId:null, bookedAt:null });
+    if(r.candidateId && this.candidates.some(c=>c.id===r.candidateId)) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, slotId:null, slotDate:null, slotTime:null, answers:null, additions:[], usedAt:null });
+    await b.commit();
+  },
+  // Interview records whose candidate was already removed (left over from the old Remove button).
+  orphans(){ return this.responses.filter(r=>!this.candidates.some(c=>c.id===r.candidateId)); },
+  async cleanOrphans(){
+    const o=this.orphans(); if(!o.length){ $("intCount").textContent="No leftover records."; return; }
+    if(!confirm(`Delete ${o.length} leftover interview record${o.length===1?"":"s"} whose candidate was already removed?`)) return;
+    const b=db.batch(); o.forEach(r=>{ b.delete(db.collection("responses").doc(r.id)); const sl=this.slots.find(x=>x.responseId===r.id); if(sl) b.update(db.collection("slots").doc(sl.id), { booked:false, responseId:null, bookedAt:null }); }); await b.commit();
+  },
   async resetCandidate(id){ if(!confirm("Let this person book again? Their earlier response is kept.")) return; await db.collection("candidates").doc(id).update({ used:false, responseId:null, slotId:null, slotDate:null, slotTime:null, answers:null, additions:[], usedAt:null }); },
   renderCandidates(){
     const q=($("candSearch").value||"").toLowerCase(), jf=$("candFilterJob").value;
@@ -828,11 +862,11 @@ const A = {
     $("candSummary").textContent=`${this.candidates.length} approved \u00b7 ${used} booked \u00b7 ${this.candidates.length-used} not yet`;
     if(!this.candidates.length){ $("candAdmin").innerHTML=`<p class="muted">Nobody on the list yet. Until you add names, no one can book.</p>`; return; }
     if(!list.length){ $("candAdmin").innerHTML=`<p class="muted">No matches.</p>`; return; }
-    $("candAdmin").innerHTML=`<table><thead><tr><th>Name</th><th>Phone</th><th>Posting</th><th>Resume</th><th>Status</th><th></th></tr></thead><tbody>${list.map(c=>`
-      <tr><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td><td><span class="pill grey">${esc(this.jobTitle(c.job))}</span></td>
+    $("candAdmin").innerHTML=`<table><thead><tr><th style="width:34px"><input type="checkbox" onchange="A.toggleAllCand(this.checked)" title="Select all shown" style="width:18px;height:18px;padding:0"></th><th>Name</th><th>Phone</th><th>Posting</th><th>Resume</th><th>Status</th><th></th></tr></thead><tbody>${list.map(c=>`
+      <tr><td><input type="checkbox" class="candsel" value="${c.id}" onchange="A.updateSel()" style="width:18px;height:18px;padding:0"></td><td>${esc(c.firstName)} ${esc(c.lastName)}</td><td>${esc(c.phone)}</td><td><span class="pill grey">${esc(this.jobTitle(c.job))}</span></td>
       <td id="cres_${c.id}">${c.resumeUrl?`<a href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">${esc(c.resumeName||"Open")}</a> <button class="quiet small" onclick="A.removeResume('${c.id}')">\u2715</button>`:`<button class="quiet small" onclick="A.uploadResume('${c.id}')">Attach</button>`}</td>
       <td>${c.used?'<span class="pill booked">Booked</span>':'<span class="pill open">Not yet</span>'}</td>
-      <td style="text-align:right;white-space:nowrap"><button class="quiet small" onclick="A.printCandidate('${c.id}')">Print packet</button> <button class="quiet small" onclick="A.openCq('${c.id}')">Prep${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button> ${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Remove</button></td></tr>`).join("")}</tbody></table>`;
+      <td style="text-align:right;white-space:nowrap"><button class="quiet small" onclick="A.printCandidate('${c.id}')">Print packet</button> <button class="quiet small" onclick="A.openCq('${c.id}')">Prep${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button> ${c.used?`<button class="quiet small" onclick="A.resetCandidate('${c.id}')">Allow again</button> `:''}<button class="danger small" onclick="A.removeCandidate('${c.id}')">Delete</button></td></tr>`).join("")}</tbody></table>`;
   },
 
   /* ----- staff ----- */
@@ -938,24 +972,19 @@ const A = {
     $("nInt").textContent=this.responses.length;
     const list=this.interviewList(); const who=$("intWho").value;
     $("intCount").textContent=`${list.length} interview${list.length===1?"":"s"}`;
+    const ob=$("orphanBtn"); if(ob){ const o=this.orphans().length; ob.style.display=o?"":"none"; ob.textContent=`Clean up ${o} leftover record${o===1?"":"s"}`; }
     if(!list.length){ $("intList").innerHTML=`<p class="muted">${who==="mine"?"No interviews assigned to you yet. Switch to \u201cAll interviews\u201d to see everyone's, or assign yourself when creating slots.":"No bookings yet. Share the candidate link and they'll appear here."}</p>`; return; }
     const t=todayIso();
     $("intList").innerHTML=list.map(r=>{
       const c=this.candFor(r); const past=r.slotDate<t;
       const ans=Object.entries(r.answers||{}).map(([qid,a])=>`<div class="ans"><div class="k">${esc(a.question)}</div><div class="v">${Array.isArray(a.answer)?esc(a.answer.join(", ")):(esc(a.answer)||'<span class="muted">(blank)</span>')}</div>${this.addsFor(r,qid).map(x=>`<div class="v" style="border-left:3px solid var(--green);padding-left:10px;margin-top:6px;font-size:14px">${esc(x.text)} <span class="muted">\u2014 added ${x.at?new Date(x.at).toLocaleDateString():""}</span></div>`).join("")}</div>`).join("")||`<p class="muted">No questions were asked.</p>`;
       const ok=this.confirmed(r);
-      return `<details class="resp"><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong><span class="pill ${ok?'booked':'grey'}">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}${ok?"":" \u00b7 unconfirmed"}</span><span class="pill grey">${esc(this.jobTitle(r.job))}</span><span class="muted">${(r.staff||[]).map(esc).join(", ")||"no interviewer assigned"}</span></summary>
+      return `<details class="resp"><summary><strong>${esc(r.firstName)} ${esc(r.lastName)}</strong>${c?"":'<span class="pill" style="background:var(--red-tint);color:var(--red)">candidate removed</span>'}<span class="pill ${ok?'booked':'grey'}">${r.slotDate?shortDate(r.slotDate)+" "+ampm(r.slotTime):"no slot"}${ok?"":" \u00b7 unconfirmed"}</span><span class="pill grey">${esc(this.jobTitle(r.job))}</span><span class="muted">${(r.staff||[]).map(esc).join(", ")||"no interviewer assigned"}</span></summary>
         <div class="body"><p class="muted" style="margin:10px 0 0">${esc(r.phone||"")}</p>${ans}
-        <div class="row" style="margin-top:12px"><button class="small" onclick="A.printResponse('${r.id}')">Print interview packet</button>${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Open resume</a>`:`<span class="muted">No resume attached</span>`}${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep questions${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Add to calendar</button><button class="danger small" onclick="A.deleteResponse('${r.id}')">Delete</button></div></div></details>`;
+        <div class="row" style="margin-top:12px"><button class="small" onclick="A.printResponse('${r.id}')">Print interview packet</button>${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Open resume</a>`:`<span class="muted">No resume attached</span>`}${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep questions${(c.interviewQuestions||[]).length?" ("+c.interviewQuestions.length+")":""}</button>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Add to calendar</button><button class="quiet small" onclick="A.cancelBooking('${r.id}')">Cancel booking</button>${c?`<button class="danger small" onclick="A.deleteCandidateFully(['${c.id}'])">Delete candidate</button>`:`<button class="danger small" onclick="A.cancelBooking('${r.id}')">Delete record</button>`}</div></div></details>`;
     }).join("");
   },
-  async deleteResponse(id){
-    const r=this.responses.find(x=>x.id===id); if(!confirm("Delete this booking? The slot is freed and the candidate can book again.")) return;
-    const b=db.batch(); b.delete(db.collection("responses").doc(id));
-    if(r.slotId) b.update(db.collection("slots").doc(r.slotId), { booked:false, responseId:null, bookedAt:null });
-    if(r.candidateId) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, slotId:null, slotDate:null, slotTime:null, answers:null, additions:[], usedAt:null });
-    try{ await b.commit(); }catch(e){ await db.collection("responses").doc(id).delete(); }
-  },
+  deleteResponse(id){ this.cancelBooking(id); },
   exportIcs(onlyId){
     const list = onlyId ? this.responses.filter(r=>r.id===onlyId) : this.interviewList();
     if(!list.length) return;
