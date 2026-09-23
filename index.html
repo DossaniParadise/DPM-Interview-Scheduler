@@ -124,7 +124,8 @@
   .icard .t small{display:block;font-size:12px;color:var(--ink-3);font-weight:500}
   .icard .who{font-weight:600;font-size:17px}
   .icard .meta{color:var(--ink-2);font-size:14px;margin-top:2px}
-  .icard .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .icard .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+  .icard .rm{color:var(--ink-3);padding:7px 10px}.icard .rm:hover{color:var(--red);background:var(--red-tint);border-color:var(--red-tint)}
   .icard.past{opacity:.6}
   .empty{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--ink-3)}
   /* prep panel */
@@ -711,12 +712,12 @@ const A = {
     const h=new Date().getHours(); const greet=h<12?"Good morning":h<17?"Good afternoon":"Good evening";
     const card=r=>{ const c=this.candFor(r); const past=r.slotDate<t||(r.slotDate===t&&toMin(r.slotTime)+(r.slotLength||30)<=nm);
       return `<div class="icard ${past?'past':''}"><div class="t">${ampm(r.slotTime)}<small>${r.slotLength||30} min</small></div>
-        <div><div class="who">${esc(r.firstName)} ${esc(r.lastName)}</div><div class="meta">${esc(this.jobTitle(r.job))} \u00b7 ${esc(r.phone||"")}${(r.staff||[]).length>1?" \u00b7 with "+(r.staff||[]).filter(x=>x.toLowerCase()!==me).map(x=>esc(this.staffName(x))).join(", "):""}${c&&this.cqNorm(c.interviewQuestions).length?` \u00b7 ${this.cqNorm(c.interviewQuestions).length} prep question${this.cqNorm(c.interviewQuestions).length===1?"":"s"}`:""}</div></div>
-        <div class="acts"><button class="small" onclick="A.printResponse('${r.id}')">Print packet</button>${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep</button>`:""}${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Resume</a>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Calendar</button></div></div>`; };
+        <div><div class="who">${esc(r.firstName)} ${esc(r.lastName)}${c?"":' <span class="pill" style="background:var(--red-tint);color:var(--red);vertical-align:middle">leftover \u2014 candidate already deleted</span>'}${c&&!this.confirmed(r)?' <span class="pill grey" style="vertical-align:middle">unconfirmed</span>':''}</div><div class="meta">${esc(this.jobTitle(r.job))} \u00b7 ${esc(r.phone||"")}${(r.staff||[]).length>1?" \u00b7 with "+(r.staff||[]).filter(x=>x.toLowerCase()!==me).map(x=>esc(this.staffName(x))).join(", "):""}${c&&this.cqNorm(c.interviewQuestions).length?` \u00b7 ${this.cqNorm(c.interviewQuestions).length} prep question${this.cqNorm(c.interviewQuestions).length===1?"":"s"}`:""}</div></div>
+        <div class="acts" id="acts_${r.id}"><button class="small" onclick="A.printResponse('${r.id}')">Print packet</button>${c?`<button class="quiet small" onclick="A.openCq('${c.id}')">Prep</button>`:""}${c&&c.resumeUrl?`<a class="quiet small" style="display:inline-block;text-decoration:none;padding:7px 12px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px" href="${esc(c.resumeUrl)}" target="_blank" rel="noopener">Resume</a>`:""}<button class="quiet small" onclick="A.exportIcs('${r.id}')">Calendar</button><button class="quiet small rm" title="Remove" onclick="A.askRemove('${r.id}')">\u2715</button></div></div>`; };
     const by={}; upcoming.forEach(r=>(by[r.slotDate]=by[r.slotDate]||[]).push(r));
     box.innerHTML=`
       <div class="hello"><div><h1>${greet}, ${esc(name)}.</h1><div class="sub">${today.length?`You have ${today.length} interview${today.length===1?"":"s"} today.`:upcoming.length?`Your next interview is ${shortDate(next.slotDate)}.`:"Nothing on your calendar yet."}</div></div>
-        ${upcoming.length?`<button class="quiet" onclick="$('intWho').value='mine';A.exportIcs()">Send all to Outlook / Teams</button>`:""}</div>
+        <div class="row">${this.orphans().length?`<button class="danger" onclick="A.cleanOrphans()">Delete ${this.orphans().length} leftover record${this.orphans().length===1?"":"s"}</button>`:""}${upcoming.length?`<button class="quiet" onclick="$('intWho').value='mine';A.exportIcs()">Send all to Outlook / Teams</button>`:""}</div></div>
       <div class="stats"><div class="stat"><div class="n">${today.length}</div><div class="l">Today</div></div><div class="stat"><div class="n">${upcoming.length}</div><div class="l">Upcoming, assigned to you</div></div><div class="stat"><div class="n">${this.responses.length}</div><div class="l">Booked overall</div></div><div class="stat"><div class="n">${myQs}</div><div class="l">Questions you ask everyone</div></div></div>
       ${next?`<div class="next"><div><div class="k">Up next</div><div class="who">${esc(next.firstName)} ${esc(next.lastName)}</div><div class="when">${dateLabel(next.slotDate)} at ${ampm(next.slotTime)} \u00b7 ${esc(this.jobTitle(next.job))} \u00b7 ${esc(next.phone||"")}</div></div><div class="row"><button onclick="A.printResponse('${next.id}')">Print packet</button>${this.candFor(next)?`<button onclick="A.openCq('${this.candFor(next).id}')">Prep questions</button>`:""}</div></div>`:""}
       ${Object.keys(by).length?Object.keys(by).sort().map(d=>`<div class="dayhead">${d===t?"Today \u00b7 ":""}${dateLabel(d)}</div>${by[d].map(card).join("")}`).join(""):`<div class="empty">No upcoming interviews assigned to you.<br><span style="font-size:14px">Interviews appear here once you're picked as an interviewer when slots are created, or added on a slot afterward.</span></div>`}
@@ -834,14 +835,21 @@ const A = {
     const st=$("cStatus"); if(st) st.textContent=`Deleted ${ids.length} candidate${ids.length===1?"":"s"}.`;
   },
   removeCandidate(id){ this.deleteCandidateFully([id]); },
+  askRemove(rid){
+    const r=this.responses.find(x=>x.id===rid); const box=$("acts_"+rid); if(!r||!box) return;
+    const c=this.candFor(r);
+    box.innerHTML = c
+      ? `<span class="muted" style="align-self:center">Remove ${esc(r.firstName)}:</span><button class="quiet small" onclick="A.cancelBooking('${rid}',true)">Cancel booking only</button><button class="danger small" onclick="A.deleteCandidateFully(['${c.id}'],true)">Delete candidate</button><button class="quiet small" onclick="A.renderHome()">Keep</button>`
+      : `<span class="muted" style="align-self:center">This record's candidate is already gone.</span><button class="danger small" onclick="A.cancelBooking('${rid}',true)">Delete record</button><button class="quiet small" onclick="A.renderHome()">Keep</button>`;
+  },
   selectedCands(){ return [...document.querySelectorAll(".candsel:checked")].map(i=>i.value); },
   toggleAllCand(on){ document.querySelectorAll(".candsel").forEach(i=>i.checked=on); this.updateSel(); },
   updateSel(){ const n=this.selectedCands().length; const b=$("delSelBtn"); if(b){ b.style.display=n?"":"none"; b.textContent=`Delete ${n} selected`; } },
   deleteSelected(){ this.deleteCandidateFully(this.selectedCands()); },
   // Cancel just the booking: frees the slot, keeps the person on the list so they can book again.
-  async cancelBooking(id){
+  async cancelBooking(id, silent){
     const r=this.responses.find(x=>x.id===id); if(!r) return;
-    if(!confirm(`Cancel ${r.firstName} ${r.lastName}'s booking? Their slot is freed and they can book again. Their answers are deleted.`)) return;
+    if(!silent && !confirm(`Cancel ${r.firstName} ${r.lastName}'s booking? Their slot is freed and they can book again. Their answers are deleted.`)) return;
     const b=db.batch(); b.delete(db.collection("responses").doc(id));
     const sl=this.slots.find(x=>x.responseId===id); if(sl) b.update(db.collection("slots").doc(sl.id), { booked:false, responseId:null, bookedAt:null });
     if(r.candidateId && this.candidates.some(c=>c.id===r.candidateId)) b.update(db.collection("candidates").doc(r.candidateId), { used:false, responseId:null, slotId:null, slotDate:null, slotTime:null, answers:null, additions:[], usedAt:null });
@@ -850,7 +858,7 @@ const A = {
   // Interview records whose candidate was already removed (left over from the old Remove button).
   orphans(){ return this.responses.filter(r=>!this.candidates.some(c=>c.id===r.candidateId)); },
   async cleanOrphans(){
-    const o=this.orphans(); if(!o.length){ $("intCount").textContent="No leftover records."; return; }
+    const o=this.orphans(); if(!o.length) return;
     if(!confirm(`Delete ${o.length} leftover interview record${o.length===1?"":"s"} whose candidate was already removed?`)) return;
     const b=db.batch(); o.forEach(r=>{ b.delete(db.collection("responses").doc(r.id)); const sl=this.slots.find(x=>x.responseId===r.id); if(sl) b.update(db.collection("slots").doc(sl.id), { booked:false, responseId:null, bookedAt:null }); }); await b.commit();
   },
